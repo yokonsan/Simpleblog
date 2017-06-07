@@ -2,16 +2,24 @@
 <html>
   <head>
       {% if title %}
-      <title>{{ title }} - microblog</title>
+      <title>{{ title }} - Simpleblog</title>
       {% else %}
-      <title>microblog</title>
+      <title>Simpleblog</title>
       {% endif %}
       <meta charset="UTF-8">
   </head>
   <body>
-    <div class="nav">
-
-    </div>
+    <div>Simpleblog：<a href="/index">首页</a> </div>
+    <hr>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+    {% for message in messages %}
+        <li>{{message}}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
     <div>
         {% block content %}
         {% endblock %}
