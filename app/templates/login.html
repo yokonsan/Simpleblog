@@ -1,32 +1,30 @@
 {% extends "base.html" %}
 
 {% block content %}
-<script type="text/javascript">
-    function set_openid(openid,pr) {
-        u = openid.search('<username>')
-        if (u != -1) {
-            // 请求用户的openid
-            user = prompt('输入你的 ' + pr + ' 用户名：')
-            openid = openid.substr(0, u) + user
-        }
-        form = document.forms['login'];
-        form.elements['openid'].value = openid
-    }
-</script>
+
 <h1>登录</h1>
 <form action="" method="post" name="login">
     {{form.hidden_tag()}}
     <p>
-        请输入您的OpenID，或者选择以下提供者之一：<br>
-        {{form.openid(size=80)}}<br>
-        {% for error in form.openid.errors %}
+        登录邮箱<br>
+        {{form.email(size=80)}}<br>
+        {% for error in form.email.errors %}
             <span style="color: red;">[{{error}}]</span>
         {% endfor %}<br>
-        |{% for pr in providers %}
-            <a href="javascript:set_openid('{{ pr.url }}','{{pr.name}}');">{{pr.name}}</a>|
-        {% endfor %}
+        登录密码<br>
+        {{form.password(size=80)}}<br>
+        {% for error in form.password.errors %}
+            <span style="color: red;">[{{error}}]</span>
+        {% endfor %}<br>
     </p>
     <p>{{form.remember_me}} 记住我</p>
     <p><input type="submit" value="登录"></p>
+
+    <p>
+        新用户？
+        <a href="{{ url_for('register') }}">
+            立即注册
+        </a>
+    </p>
 </form>
 {% endblock %}
