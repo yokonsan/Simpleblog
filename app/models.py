@@ -1,5 +1,6 @@
 from app import db, lm
 from flask_login import UserMixin
+from hashlib import md5
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -41,6 +42,10 @@ class User(UserMixin,db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    # Gravatar提供用户头像
+    def gravatar(self, size):
+        return 'http://www.gravatar.com/avatar/' + md5(self.email.encode('utf-8')).hexdigest() + '?d=mm&s=' + str(size)
+
     def __repr__(self):
         return '<User %r>' % (self.nickname)
 
@@ -60,7 +65,6 @@ class Role(db.Model):
         return '<Role %r>' % (self.name)
 
 
-
 # class Post(db.Model):
 #     id = db.Column(db.Integer, primary_key = True)
 #     body = db.Column(db.String(140))
@@ -70,4 +74,5 @@ class Role(db.Model):
 #
 #     def __repr__(self):
 #         return '<Post %r>' % (self.body)
+
 
