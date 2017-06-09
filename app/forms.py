@@ -26,7 +26,7 @@ class RegisterForm(FlaskForm):
         DataRequired(), Length(1, 64), Regexp('^[\u4e00-\u9fa5]|[A-Z][a-z][0-9_.]*', 0,
                                           '昵称必须以汉字或字母开头')])
     password = PasswordField('Password', validators=[
-        DataRequired(), EqualTo('password2', message='Passwords must match.')])
+        DataRequired(), EqualTo('password2', message='密码必须确认一致。')])
     password2 = PasswordField('Confirm password', validators=[DataRequired()])
 
     def validate_email(self, field):
@@ -36,3 +36,10 @@ class RegisterForm(FlaskForm):
     def validate_nickname(self, field):
         if User.query.filter_by(nickname=field.data).first():
             raise ValidationError('昵称已经存在。')
+
+# 更改密码表单
+class ChangePasswordForm(FlaskForm):
+    old_password = PasswordField('Old password', validators=[DataRequired()])
+    password = PasswordField('New password', validators=[
+        DataRequired(), EqualTo('password2', message='密码必须确认一致。')])
+    password2 = PasswordField('Confirm new password', validators=[DataRequired()])
