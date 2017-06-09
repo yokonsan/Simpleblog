@@ -8,22 +8,22 @@
     <p>
         昵称<br>
         {{form.nickname(size=80)}}<br>
-        {% for error in form.email.errors %}
+        {% for error in form.nickname.errors %}
             <span style="color: red;">{{error}}</span>
         {% endfor %}<br>
         邮箱<br>
         {{form.email(size=80)}}<br>
-        {% for error in form.password.errors %}
+        {% for error in form.email.errors %}
             <span style="color: red;">[{{error}}]</span>
         {% endfor %}<br>
         密码<br>
         {{form.password(size=80)}}<br>
-        {% for error in form.email.errors %}
+        {% for error in form.password.errors %}
             <span style="color: red;">{{error}}</span>
         {% endfor %}<br>
         确认密码<br>
         {{form.password2(size=80)}}<br>
-        {% for error in form.email.errors %}
+        {% for error in form.password2.errors %}
             <span style="color: red;">{{error}}</span>
         {% endfor %}<br>
     </p>
