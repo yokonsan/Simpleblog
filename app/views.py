@@ -1,7 +1,7 @@
 from app import app, lm
 from flask import render_template, flash, redirect, session, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
-from .forms import LogonForm, RegisterForm
+from .forms import LogonForm, RegisterForm, ChangePasswordForm
 from .models import User
 from . import db
 
@@ -31,7 +31,7 @@ def login():
 def logout():
     logout_user()
     flash('你已经登出账号。')
-    return redirect(url_for(index))
+    return redirect(url_for('index'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -46,3 +46,31 @@ def register():
     return render_template('register.html',
                            form=form,
                            title='注册')
+
+@app.route('/changepassword', methods=['GET','POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if current_user.verify_password(form.old_password.data):
+            current_user.password = form.password.data
+            db.session.add(current_user)
+            flash('你的密码已经更改。')
+            return redirect(url_for('index'))
+        else:
+            flash('无效的密码。')
+    return render_template('change_password.html',
+                           form=form,
+                           title='更改密码')
+
+@app.route('/user/<nickname>')
+@login_required
+def user(nickname):
+    user = User.query.filter_by(nickname = nickname).first()
+    if user == None:
+        flash('未发现用户：' + nickname)
+        return redirect(url_for('index'))
+    return render_template('user.html',
+                           user=user,
+                           title='个人资料')
+
