@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table>
+    <tr valign="top">
+        <td><img src="{{user.gravatar(128)}}"></td>
+        <td><h1>{{user.nickname}}的资料</h1></td>
+    </tr>
+</table>
+<hr>
+{% if posts %}
+{% for post in posts %}
+<table>
+    <tr valign="top">
+        <td><img src="{{post.author.gravatar(50)}}"></td>
+        <td>
+            <i>{{post.author.nickname}}： </i><br>
+            {{post.body}}
+        </td>
+    </tr>
+</table>
+{% endfor %}
+{% endif %}
+
+{% endblock %}
