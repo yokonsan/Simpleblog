@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>编辑资料</h1>
+<form action="" method="post" name="edit">
+    <p>
+        {{form.hidden_tag()}}
+        你的昵称：<br>
+        {{form.nickname(size=80)}}<br>
+        {% for error in form.nickname.errors %}
+            <span style="color: red;">{{error}}</span>
+        {% endfor %}<br>
+        个性签名：<br>
+        {{form.about_me(cols=80,rows=4)}}<br>
+        {% for error in form.about_me.errors %}
+            <span style="color: red;">{{error}}</span>
+        {% endfor %}<br>
+    </p>
+    <p><input type="submit" value="保存资料"></p>
+</form>
+{% endblock %}
