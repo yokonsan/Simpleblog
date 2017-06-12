@@ -1,3 +1,4 @@
+import datetime
 from app import db, lm
 from flask_login import UserMixin
 from hashlib import md5
@@ -17,8 +18,20 @@ flask_login的UserMixin类，实现了用户方法：
             is_active：如果允许用户登录，必须返回True，否则返回False。如果要禁用账户，可以返回False
             is_anonymous：对普通用户必须返回False
             fet_id()：必须返回用户的唯一标识符，使用Unicode编码字符串
+            
+实现了关注和被关注的多对多数据模型，followed和followers关系都定义为单独的一对多关系。
+必须使用可选参数foreign_keys指定的外键，用来消除外键简的歧义。
+db.backref()参数并非指定这两个关系之间的引用关系，而是回引Follow模型。回引的lazy参数为joined。
+cascade参数的值是一组由逗号分隔的层叠选项，all表示除了dalete-orphan之外的所有层叠选项。
+意思是启用所有默认层叠选项，而且还要删除孤记录。
 """
 
+# 关注关联表
+class Follow(db.Model):
+    __tablename__ = 'follows'
+    follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    followed_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 class User(UserMixin,db.Model):
     __tablename__ = 'users'
@@ -26,9 +39,38 @@ class User(UserMixin,db.Model):
     nickname = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-
+    # 关联
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    # posts = db.relationship('Post', backref='author', lazy='dynamic')
+    posts = db.relationship('Post', backref='author', lazy='dynamic')
+    # 个人资料
+    about_me = db.Column(db.String(140))
+    last_seen = db.Column(db.DateTime)
+    # 关注，被关注
+    followed = db.relationship('Follow',
+                                foreign_keys = [Follow.follower_id],
+                                backref = db.backref('follower', lazy='joined'),
+                                lazy = 'dynamic',
+                                cascade = 'all, delete-orphan')
+    followers = db.relationship('Follow',
+                                foreign_keys=[Follow.followed_id],
+                                backref=db.backref('followed', lazy='joined'),
+                                lazy='dynamic',
+                                cascade='all, delete-orphan')
+    # 关注
+    def follow(self, user):
+        if not self.is_following(user):
+            follower = Follow(follower=self, followed=user)
+            db.session.add(follower)
+    # 取消关注
+    def unfollow(self, user):
+        follower =self.followed.filter_by(followed_id=user.id).first()
+        if follower:
+            db.session.delete(follower)
+    # 做了一个followed关系查询，这个查询返回所有当前用户作为关注者的(follower, followed)对
+    def is_following(self, user):
+        return self.followed.filter_by(followed_id=user.id).first() is not None
+    def is_followed_by(self, user):
+        return self.followers.filter_by(follower_id=user.id).first() is not None
 
     # python内置装饰器，把一个方法变为属性调用
     @property
@@ -65,14 +107,13 @@ class Role(db.Model):
         return '<Role %r>' % (self.name)
 
 
-# class Post(db.Model):
-#     id = db.Column(db.Integer, primary_key = True)
-#     body = db.Column(db.String(140))
-#     timestamp = db.Column(db.DateTime)
-#
-#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-#
-#     def __repr__(self):
-#         return '<Post %r>' % (self.body)
+class Post(db.Model):
+    __tablename__ = 'posts'
+    id = db.Column(db.Integer, primary_key = True)
+    body = db.Column(db.String(140))
+    timestamp = db.Column(db.DateTime)
 
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+    def __repr__(self):
+        return '<Post %r>' % (self.body)
