@@ -1,9 +1,10 @@
 from app import app, lm
 from flask import render_template, flash, redirect, session, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
-from .forms import LogonForm, RegisterForm, ChangePasswordForm
+from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProfileForm
 from .models import User
 from . import db
+from datetime import datetime
 
 
 @app.route('/')
@@ -13,9 +14,18 @@ def index():
     return render_template('index.html',
                            title = '首页')
 
+@app.errorhandler(404)
+def internal_error(error):
+    return render_template('404.html', title='404'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return render_template('500.html', title='500'), 500
+
 @app.route('/login', methods=['GET','POST'])
 def login():
-    form = LogonForm()
+    form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
@@ -73,4 +83,29 @@ def user(nickname):
     return render_template('user.html',
                            user=user,
                            title='个人资料')
+
+
+# 用户最后一次访问时间
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.now()
+        db.session.add(current_user)
+        db.session.commit()
+
+# 编辑用户资料
+@app.route('/editprofile', methods=['GET','POST'])
+@login_required
+def editprofile():
+    form = ProfileForm()
+    if form.validate_on_submit():
+        current_user.nickname = form.nickname.data
+        current_user.about_me = form.about_me.data
+        db.session.add(current_user)
+        flash('更改资料成功。')
+        return redirect(url_for('editprofile'))
+    else:
+        form.nickname.data = current_user.nickname
+        form.about_me.data = current_user.about_me
+    return render_template('editprofile.html', form=form)
 
