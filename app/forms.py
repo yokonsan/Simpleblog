@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, BooleanField, PasswordField, SubmitField, ValidationError
+from wtforms import StringField, BooleanField, PasswordField, SubmitField, ValidationError, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo
 from .models import User
 
@@ -12,7 +12,7 @@ from .models import User
 如果表单类中定义了以validate_开头且后面跟着字段名的方法，这个方法就和常规的验证函数一起调用。
 """
 
-class LogonForm(FlaskForm):
+class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Length(1, 64),
                                              Email()])
     password = PasswordField('password', validators=[DataRequired()])
@@ -43,3 +43,8 @@ class ChangePasswordForm(FlaskForm):
     password = PasswordField('New password', validators=[
         DataRequired(), EqualTo('password2', message='密码必须确认一致。')])
     password2 = PasswordField('Confirm new password', validators=[DataRequired()])
+
+# 编辑用户资料表单
+class ProfileForm(FlaskForm):
+    nickname = StringField('nickname', validators=[Length(0, 7)])
+    about_me = TextAreaField('about me', validators=[Length(0, 140)])
