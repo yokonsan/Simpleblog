@@ -13,3 +13,10 @@ SECRET_KEY = 'you-guess'
 
 BABEL_DEFAULT_LOCALE = 'zh_Hans_CN'
 
+# 邮件支持
+MAIL_SERVER = 'smtp.163.com'
+MAIL_PORT = 25
+MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+# 管理员邮箱
+ADMINS = os.environ.get('ADMINS_MAIL')
