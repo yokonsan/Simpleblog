@@ -24,6 +24,20 @@ flask_login的UserMixin类，实现了用户方法：
 db.backref()参数并非指定这两个关系之间的引用关系，而是回引Follow模型。回引的lazy参数为joined。
 cascade参数的值是一组由逗号分隔的层叠选项，all表示除了dalete-orphan之外的所有层叠选项。
 意思是启用所有默认层叠选项，而且还要删除孤记录。
+is_following()方法和is_followed_by()方法分别在左右两边的一对多关系中搜索指定用户，如果找到就返回True
+
+角色模型的permissions字段的值是一个整数，表示位标志。各操作都对应一个位位置，能执行某项操作的角色，其位会被设为1
+程序权限：
+    关注用户：0x01  
+    发表评论：0x02
+    发表文章或提问：0x04
+    管理他人评论：0x08
+    管理员：0x80
+用户角色：
+    游客：0x00 未登录的用户，只有阅读权限
+    用户：0x07 具有发布文章，提问，评论和关注用户的权限，默认角色
+    小管家：0x0f 审查不当评论的权限
+    管理员：0xff 有所有权限，包括修改用户角色权限
 """
 
 # 关注关联表
@@ -100,11 +114,41 @@ class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
+    default = db.Column(db.Boolean, default=False, index=True)
+    permissions = db.Column(db.Integer)
 
     users = db.relationship('User', backref = 'role', lazy='dynamic')
 
+    @staticmethod
+    def insert_roles():
+        roles = {
+            'User': (Permission.FOLLOW |
+                     Permission.COMMENT |
+                     Permission.WRITE_ARTICLES, True),
+            'Moderator': (Permission.FOLLOW |
+                          Permission.COMMENT |
+                          Permission.WRITE_ARTICLES |
+                          Permission.MODERATE_COMMENTS, False),
+            'Administrator': (0xff, False)
+        }
+        for r in roles:
+            role = Role.query.filter_by(name=r).first()
+            if role is None:
+                role = Role(name=r)
+            role.permissions = roles[r][0]
+            role.default = roles[r][1]
+            db.session.add(role)
+        db.session.commit()
+
     def __repr__(self):
         return '<Role %r>' % (self.name)
+
+class Permission:
+    FOLLOW = 0x01
+    COMMENT = 0x02
+    WRITE_ARTICLES = 0x04
+    MODERATE_COMMENTS = 0x08
+    ADMINISTER = 0x80
 
 
 class Post(db.Model):
