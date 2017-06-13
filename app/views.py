@@ -107,5 +107,5 @@ def editprofile():
     else:
         form.nickname.data = current_user.nickname
         form.about_me.data = current_user.about_me
-    return render_template('editprofile.html', form=form)
+    return render_template('editprofile.html', form=form, title='编辑资料')
 
