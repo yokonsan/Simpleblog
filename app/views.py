@@ -5,6 +5,7 @@ from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProfileForm
 from .models import User
 from . import db
 from datetime import datetime
+from .decorators import admin_required
 
 
 @app.route('/')
@@ -109,3 +110,11 @@ def editprofile():
         form.about_me.data = current_user.about_me
     return render_template('editprofile.html', form=form, title='编辑资料')
 
+# 管理员页面
+@app.route('/admin')
+@admin_required
+@login_required
+def admin():
+
+    return render_template('admin.html',
+                           title='控制台')

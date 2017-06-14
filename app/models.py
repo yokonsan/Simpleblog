@@ -1,6 +1,6 @@
 import datetime
-from app import db, lm
-from flask_login import UserMixin
+from app import db, lm, app
+from flask_login import UserMixin, AnonymousUserMixin
 from hashlib import md5
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -70,6 +70,23 @@ class User(UserMixin,db.Model):
                                 backref=db.backref('followed', lazy='joined'),
                                 lazy='dynamic',
                                 cascade='all, delete-orphan')
+
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+        if self.role is None:
+            if self.email == app.config['ADMINS']:
+                self.role = Role.query.filter_by(permissions=0xff).first()
+            if self.role is None:
+                self.role = Role.query.filter_by(default=True).first()
+
+    # 检查用户是否有指定权限
+    def operation(self, permissions):
+        return self.role is not None and \
+               (self.role.permissions & permissions) == permissions
+
+    def is_administrator(self):
+        return self.operation(Permission.ADMINISTER)
+
     # 关注
     def follow(self, user):
         if not self.is_following(user):
@@ -161,3 +178,15 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<Post %r>' % (self.body)
+
+
+class AnonymousUser(AnonymousUserMixin):
+    def operation(self, permissions):
+        return False
+
+    def is_administrator(self):
+        return False
+
+lm.anonymous_user = AnonymousUser
+
+
