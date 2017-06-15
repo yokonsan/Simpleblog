@@ -171,8 +171,9 @@ class Permission:
 class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key = True)
-    body = db.Column(db.String(140))
-    timestamp = db.Column(db.DateTime)
+    title = db.Column(db.String(64))
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow)
 
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 

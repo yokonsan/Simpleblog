@@ -1,8 +1,8 @@
 from app import app, lm
 from flask import render_template, flash, redirect, session, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
-from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProfileForm
-from .models import User
+from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProfileForm, PostForm
+from .models import User, Permission, Role, Post
 from . import db
 from datetime import datetime
 from .decorators import admin_required
@@ -12,8 +12,9 @@ from .decorators import admin_required
 @app.route('/index')
 # @login_required
 def index():
-    return render_template('index.html',
-                           title = '首页')
+   # posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template('index.html',title = '首页',
+                           Permission=Permission)
 
 @app.errorhandler(404)
 def internal_error(error):
@@ -81,10 +82,11 @@ def user(nickname):
     if user == None:
         flash('未发现用户：' + nickname)
         return redirect(url_for('index'))
+    posts = user.posts.order_by(Post.timestamp.desc()).all()
     return render_template('user.html',
                            user=user,
+                           posts=posts,
                            title='个人资料')
-
 
 # 用户最后一次访问时间
 @app.before_request
@@ -118,3 +120,20 @@ def admin():
 
     return render_template('admin.html',
                            title='控制台')
+
+# 博客文章
+@app.route('/write', methods=['GET', 'POST'])
+def write():
+    form = PostForm()
+    if current_user.operation(Permission.WRITE_ARTICLES) and \
+            form.validate_on_submit():
+        post = Post(body=form.body.data,
+                    title=form.title.data,
+                    author = current_user._get_current_object())
+
+        db.session.add(post)
+        flash('发布成功！')
+        return redirect(url_for('write'))
+    return render_template('write.html', form=form, title='写文章')
+
+

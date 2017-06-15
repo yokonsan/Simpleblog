@@ -48,3 +48,9 @@ class ChangePasswordForm(FlaskForm):
 class ProfileForm(FlaskForm):
     nickname = StringField('nickname', validators=[Length(0, 7)])
     about_me = TextAreaField('about me', validators=[Length(0, 140)])
+
+# 博客文章表单
+class PostForm(FlaskForm):
+    body = TextAreaField('写文章或者提问?', validators=[DataRequired()])
+    title = StringField('标题', validators=[Length(1, 20)])
+
