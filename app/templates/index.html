@@ -6,7 +6,37 @@
     {% if current_user.is_authenticated %}
         {{ current_user.nickname }}
     {% else %}
-        Stranger
+        World
     {% endif %}
 </h1>
+<div>
+    {% if current_user.is_authenticated %}
+    <a href="{{url_for('user', nickname=current_user.nickname)}}">
+        <img src="{{current_user.gravatar(size=40)}}">
+    </a>
+    {% endif %}
+    {% if current_user.operation(Permission.WRITE_ARTICLES) %}
+    <a href="{{url_for('write')}}">写文章</a>
+    <a href="">草稿</a>
+    {% endif %}
+</div>
+<hr>
+<ul>
+    {% for post in posts %}
+    <li>
+        <div>
+            <a href="{{url_for('user', nickname=post.author.nickname)}}">
+                <img src="{{post.author.gravatar(size=40)}}">
+            </a>
+        </div>
+        <div>
+            <a href="{{url_for('user',username=post.author.nickname)}}">
+                {{post.author.username}}
+            </a>
+        </div>
+
+        <div>{{post.body}}</div>
+    </li>
+    {% endfor %}
+</ul>
 {% endblock %}
