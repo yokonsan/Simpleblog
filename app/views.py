@@ -1,5 +1,5 @@
 from app import app, lm
-from flask import render_template, flash, redirect, session, url_for, request
+from flask import render_template, flash, redirect, session, url_for, request, abort
 from flask_login import login_user, logout_user, current_user, login_required
 from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProfileForm, PostForm
 from .models import User, Permission, Role, Post
@@ -12,9 +12,16 @@ from .decorators import admin_required
 @app.route('/index')
 # @login_required
 def index():
-   # posts = Post.query.order_by(Post.timestamp.desc()).all()
-    return render_template('index.html',title = '首页',
-                           Permission=Permission)
+    # posts = Post.query.order_by(Post.timestamp.desc()).all()
+    # pages
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=app.config['POSTS_PER_PAGE'],
+        error_out=False
+    )
+    posts = pagination.items
+    return render_template('index.html',title = '首页',posts=posts,
+                           pagination=pagination, Permission=Permission)
 
 @app.errorhandler(404)
 def internal_error(error):
@@ -136,4 +143,26 @@ def write():
         return redirect(url_for('write'))
     return render_template('write.html', form=form, title='写文章')
 
+@app.route('/post/<int:id>')
+def post(id):
+    post = Post.query.get_or_404(id)
+    return render_template('post.html', posts=[post],title=post.title)
+
+# 编辑文章
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit(id):
+    post = Post.query.get_or_404(id)
+    if current_user != post.author and \
+        not current_user.operation(Permission.ADMINISTER):
+        abort(403)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.body = form.body.data
+        db.session.add(post)
+        flash('更新成功。')
+        return redirect(url_for('post', id=post.id))
+    form.title.data = post.title
+    form.body.data = post.body
+    return render_template('editpost.html', form=form, title='编辑文章')
 
