@@ -28,15 +28,28 @@
             <a href="{{url_for('user', nickname=post.author.nickname)}}">
                 <img src="{{post.author.gravatar(size=40)}}">
             </a>
+            <a href="{{url_for('post', id=post.id)}}">{{post.title}}</a>
         </div>
         <div>
-            <a href="{{url_for('user',username=post.author.nickname)}}">
+            <a href="{{url_for('user',nickname=post.author.nickname)}}">
                 {{post.author.username}}
             </a>
         </div>
-
         <div>{{post.body}}</div>
+        <div>
+            {% if current_user == post.author %}
+            <a href="{{ url_for('edit', id=post.id) }}">
+                <span>编辑</span>
+            </a>
+            {% elif current_user.is_administrator() %}
+            <a href="{{ url_for('edit', id=post.id) }}">
+                <span>编辑【管理员】</span>
+            </a>
+            {% endif %}
+        </div>
     </li>
     {% endfor %}
 </ul>
+{% if posts.has_prev %}<a href="{{ url_for('index', page = posts.prev_num) }}"><<< 上一页</a>{% else %}<<< 上一页{% endif %} |
+{% if posts.has_next %}<a href="{{ url_for('index', page = posts.next_num) }}">下一页 >>></a>{% else %}下一页 >>>{% endif %}
 {% endblock %}

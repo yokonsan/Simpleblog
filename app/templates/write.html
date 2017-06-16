@@ -20,4 +20,12 @@
     <p><input type="submit" value="发布"></p>
     <p><input type="submit" value="保存草稿"></p>
 </form>
+{% if post.body_html %}
+    {{ post.body_html | safe }}
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
 {% endblock %}
