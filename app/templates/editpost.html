@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>编辑文章</h1>
+<form action="" method="post" name="login">
+    {{form.hidden_tag()}}
+    <p>
+        标题<br>
+        {{form.title(size=80)}}<br>
+        {% for error in form.title.errors %}
+            <span style="color: red;">[{{error}}]</span>
+        {% endfor %}<br>
+        文章<br>
+        {{form.body(cols=80,rows=10)}}<br>
+        {% for error in form.body.errors %}
+            <span style="color: red;">[{{error}}]</span>
+        {% endfor %}<br>
+    </p>
+    <p><input type="submit" value="更新"></p>
+    <p><input type="submit" value="保存草稿"></p>
+</form>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+{% endblock %}
