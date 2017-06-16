@@ -20,3 +20,6 @@ MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 # 管理员邮箱
 ADMINS = os.environ.get('ADMINS_MAIL')
+
+# 分页
+POSTS_PER_PAGE = 3
