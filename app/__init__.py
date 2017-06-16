@@ -3,6 +3,7 @@ from flask_babel import Babel
 from flask_sqlalchemy import SQLAlchemy
 
 from flask_login import LoginManager
+from flask_pagedown import PageDown
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -12,6 +13,9 @@ db = SQLAlchemy(app)
 lm = LoginManager()
 lm.init_app(app)
 lm.login_view = 'login'
+
+pagedown = PageDown()
+pagedown.init_app(app)
 
 if not app.debug:
     import logging

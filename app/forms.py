@@ -3,6 +3,8 @@ from wtforms import StringField, BooleanField, PasswordField, SubmitField, Valid
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo
 from .models import User
 
+from flask_pagedown.fields import PageDownField
+
 
 """
 注册表单使用wtforms提供的Regexp验证函数，以一个正则为参数，确保昵称字段只包含汉子，字母，数字，下划线和点号。
@@ -51,6 +53,6 @@ class ProfileForm(FlaskForm):
 
 # 博客文章表单
 class PostForm(FlaskForm):
-    body = TextAreaField('写文章或者提问?', validators=[DataRequired()])
+    body = PageDownField('写文章或者提问?', validators=[DataRequired()])
     title = StringField('标题', validators=[Length(1, 20)])
 

@@ -3,6 +3,8 @@ from app import db, lm, app
 from flask_login import UserMixin, AnonymousUserMixin
 from hashlib import md5
 from werkzeug.security import generate_password_hash, check_password_hash
+from markdown import markdown
+import bleach
 
 
 """
@@ -38,6 +40,10 @@ is_following()方法和is_followed_by()方法分别在左右两边的一对多�
     用户：0x07 具有发布文章，提问，评论和关注用户的权限，默认角色
     小管家：0x0f 审查不当评论的权限
     管理员：0xff 有所有权限，包括修改用户角色权限
+创建数据库后，需要创建用户角色。
+使用python manage.py shell
+>>> Role.insert_roles()
+>>> Role.query.all()
 """
 
 # 关注关联表
@@ -173,14 +179,28 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String(64))
     body = db.Column(db.Text)
+    body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow)
 
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+    @staticmethod
+    def preview_body(target, value, oldvalue, initiator):
+        allowed_tags = [
+            'a', 'abbr', 'acronym', 'b', 'img', 'blockquote', 'code',
+            'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul', 'h1', 'h2',
+            'h3', 'p'
+        ]
+        target.body_html = bleach.linkify(bleach.clean(
+            markdown(value, output_format='html'),
+            tags=allowed_tags, strip=True)
+        )
+
     def __repr__(self):
         return '<Post %r>' % (self.body)
 
-
+db.event.listen(Post.body, 'set', Post.preview_body)
+# 检验用户权限对应的类
 class AnonymousUser(AnonymousUserMixin):
     def operation(self, permissions):
         return False
