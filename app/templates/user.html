@@ -9,6 +9,24 @@
             {% if user.about_me %}<p>{{user.about_me}}</p>{% endif %}
             {% if user.last_seen %}<p><i>最后离开时间：{{user.last_seen}}</i></p>{% endif %}
             {% if user == current_user %}<p><a href="{{url_for('editprofile')}}">编辑资料</a> </p>{% endif %}
+            <!--关注者-->
+            {% if current_user.operation(Permission.FOLLOW) and user != current_user %}
+                {% if not current_user.is_following(user) %}
+                <a href="{{ url_for('follow', nickname=user.nickname) }}">关注</a>
+                {% else %}
+                <a href="{{ url_for('unfollow', nickname=user.nickname) }}">取消关注</a>
+                {% endif %}
+            {% endif %}
+            <a href="{{ url_for('follows', nickname=user.nickname) }}">
+                关注者：<span>{{ user.followers.count() }}</span>
+            </a>
+            <a href="{{ url_for('follows', nickname=user.nickname) }}">
+                关注了：<span>{{ user.followed.count() }}</span>
+            </a>
+            {% if current_user.is_authenticated and user != current_user and
+                user.is_following(current_user) %}
+            | <span>关注了你</span>
+            {% endif %}
         </td>
     </tr>
 </table>
@@ -17,6 +35,9 @@
 {% for post in posts %}
     {% include "_posts.html" %}
 {% endfor %}
+<div>
+    {% if posts.has_prev %}<a href="{{ url_for('index', page = posts.prev_num) }}"><<< 上一页</a>{% else %}<<< 上一页{% endif %} |
+    {% if posts.has_next %}<a href="{{ url_for('index', page = posts.next_num) }}">下一页 >>></a>{% else %}下一页 >>>{% endif %}
+</div>
 {% endif %}
-
 {% endblock %}
