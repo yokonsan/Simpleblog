@@ -1,12 +1,21 @@
 from app import app, lm
-from flask import render_template, flash, redirect, session, url_for, request, abort
+from flask import render_template, flash, redirect, session, url_for, request, abort, make_response
 from flask_login import login_user, logout_user, current_user, login_required
 from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProfileForm, PostForm
 from .models import User, Permission, Role, Post
 from . import db
 from datetime import datetime
-from .decorators import admin_required
+from .decorators import admin_required, permission_required
 
+
+@app.errorhandler(404)
+def internal_error(error):
+    return render_template('404.html', title='404'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return render_template('500.html', title='500'), 500
 
 @app.route('/')
 @app.route('/index')
@@ -22,15 +31,6 @@ def index():
     posts = pagination.items
     return render_template('index.html',title = '首页',posts=posts,
                            pagination=pagination, Permission=Permission)
-
-@app.errorhandler(404)
-def internal_error(error):
-    return render_template('404.html', title='404'), 404
-
-@app.errorhandler(500)
-def internal_error(error):
-    db.session.rollback()
-    return render_template('500.html', title='500'), 500
 
 @app.route('/login', methods=['GET','POST'])
 def login():
@@ -93,6 +93,7 @@ def user(nickname):
     return render_template('user.html',
                            user=user,
                            posts=posts,
+                           Permission=Permission,
                            title='个人资料')
 
 # 用户最后一次访问时间
@@ -119,15 +120,6 @@ def editprofile():
         form.about_me.data = current_user.about_me
     return render_template('editprofile.html', form=form, title='编辑资料')
 
-# 管理员页面
-@app.route('/admin')
-@admin_required
-@login_required
-def admin():
-
-    return render_template('admin.html',
-                           title='控制台')
-
 # 博客文章
 @app.route('/write', methods=['GET', 'POST'])
 def write():
@@ -141,7 +133,8 @@ def write():
         db.session.add(post)
         flash('发布成功！')
         return redirect(url_for('write'))
-    return render_template('write.html', form=form, title='写文章')
+    return render_template('write.html', form=form,post=form.body.data,
+                           title='写文章')
 
 @app.route('/post/<int:id>')
 def post(id):
@@ -165,4 +158,113 @@ def edit(id):
     form.title.data = post.title
     form.body.data = post.body
     return render_template('editpost.html', form=form, title='编辑文章')
+
+# 关注路由
+@app.route('/follow/<nickname>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def follow(nickname):
+    user = User.query.filter_by(nickname=nickname).first()
+    if user is None:
+        flash('无效的用户。')
+        return redirect(url_for('index'))
+    if current_user.is_following(user):
+        flash('你已经关注了此用户。')
+        return redirect(url_for('user', nickname=nickname))
+    current_user.follow(user)
+    flash('你已关注 %s。' % nickname)
+    return redirect(url_for('user', nickname=nickname))
+
+# 取消关注
+@app.route('/unfollow/<nickname>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def unfollow(nickname):
+    user = User.query.filter_by(nickname=nickname).first()
+    if user is None:
+        flash('无效的用户。')
+        return redirect(url_for('.index'))
+    if not current_user.is_following(user):
+        flash('你已经取消了此用户的关注。')
+        return redirect(url_for('.user', nickname=nickname))
+    current_user.unfollow(user)
+    flash('你已取消关注 %s anymore.' % nickname)
+    return redirect(url_for('user', nickname=nickname))
+
+# # 关注者
+# @app.route('/follow/<nickname>')
+# def followers(nickname):
+#     user = User.query.filter_by(nickname=nickname).first()
+#     if user is None:
+#         flash('无效的用户。')
+#         return redirect(url_for('index'))
+#     page = request.args.get('page', 1, type=int)
+#     pagination = user.followers.paginate(
+#         page, per_page=app.config['FOLLOWERS_PER_PAGE'],
+#         error_out=False
+#     )
+#     follows = [
+#         {'user': i.follower, 'timestamp': i.timestamp}
+#         for i in pagination.items
+#     ]
+#     return render_template('follow.html', user=user,
+#                            title='关注', endpoint='followers',
+#                            pagination=pagination, follows=follows)
+#
+# # 关注了
+# @app.route('/followed-by/<nickname>')
+# def followed_by(nickname):
+#     user = User.query.filter_by(nickname=nickname).first()
+#     if user is None:
+#         flash('无效的用户。')
+#         return redirect(url_for('index'))
+#     page = request.args.get('page', 1, type=int)
+#     pagination = user.followed.paginate(
+#         page, per_page=app.config['FLASKY_FOLLOWERS_PER_PAGE'],
+#         error_out=False)
+#     follows = [{'user': i.followed, 'timestamp': i.timestamp}
+#                for i in pagination.items]
+#     return render_template('follow.html', user=user,
+#                            title="关注用户",endpoint='followed_by',
+#                            pagination=pagination, follows=follows)
+
+
+@app.route('/follows/<nickname>')
+def follows(nickname):
+    user = User.query.filter_by(nickname=nickname).first()
+    if user is None:
+        flash('无效的用户。')
+        return redirect(url_for('index'))
+    page = request.args.get('page', 1, type=int)
+    pagination = user.followers.paginate(
+        page, per_page=app.config['FOLLOWERS_PER_PAGE'],
+        error_out=False
+    )
+    show_followed = False
+    if current_user.is_authenticated:
+        show_followed = bool(request.cookies.get('show_followed',''))
+    if show_followed:
+        follows = [{'user': i.follower, 'timestamp': i.timestamp}
+                   for i in pagination.items]
+    else:
+        follows = [{'user': i.followed, 'timestamp': i.timestamp}
+                   for i in pagination.items]
+
+    return render_template('follow.html', user=user,
+                           title='关注',
+                           show_followed=show_followed,
+                           pagination=pagination,
+                           Permission=Permission,
+                           follows=follows)
+
+@app.route('/followers/<nickname>')
+def show_follower(nickname):
+    resp = make_response(redirect(url_for('follows',nickname=nickname)))
+    resp.set_cookie('show_follower','',max_age=30*24*60*60)
+    return resp
+@app.route('/followed/<nickname>')
+def show_followed(nickname):
+    resp = make_response(redirect(url_for('follows',nickname=nickname)))
+    resp.set_cookie('show_followed','1',max_age=30*24*60*60)
+    return resp
 
