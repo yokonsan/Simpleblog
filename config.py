@@ -22,4 +22,6 @@ MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 ADMINS = os.environ.get('ADMINS_MAIL')
 
 # 分页
-POSTS_PER_PAGE = 3
+POSTS_PER_PAGE = 10
+# 关注者分页
+FOLLOWERS_PER_PAGE = 50
