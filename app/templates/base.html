@@ -33,6 +33,8 @@
         {% endblock %}
     </div>
     {% block scripts %}
+    {{ moment.include_moment() }}
+    {{ moment.include_jquery() }}
     {% endblock %}
   </body>
 </html>
