@@ -240,6 +240,10 @@ def follows(nickname):
         page, per_page=app.config['FOLLOWERS_PER_PAGE'],
         error_out=False
     )
+    pagination2 = user.followed.paginate(
+        page, per_page=app.config['FOLLOWERS_PER_PAGE'],
+        error_out=False
+    )
     show_followed = False
     if current_user.is_authenticated:
         show_followed = bool(request.cookies.get('show_followed',''))
@@ -248,23 +252,24 @@ def follows(nickname):
                    for i in pagination.items]
     else:
         follows = [{'user': i.followed, 'timestamp': i.timestamp}
-                   for i in pagination.items]
+                   for i in pagination2.items]
 
     return render_template('follow.html', user=user,
                            title='关注',
                            show_followed=show_followed,
                            pagination=pagination,
+                           pagination2=pagination2,
                            Permission=Permission,
                            follows=follows)
 
 @app.route('/followers/<nickname>')
 def show_follower(nickname):
     resp = make_response(redirect(url_for('follows',nickname=nickname)))
-    resp.set_cookie('show_follower','',max_age=30*24*60*60)
+    resp.set_cookie('show_followed','1',max_age=30*24*60*60)
     return resp
 @app.route('/followed/<nickname>')
 def show_followed(nickname):
     resp = make_response(redirect(url_for('follows',nickname=nickname)))
-    resp.set_cookie('show_followed','1',max_age=30*24*60*60)
+    resp.set_cookie('show_followed','',max_age=30*24*60*60)
     return resp
 
