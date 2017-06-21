@@ -56,3 +56,7 @@ class PostForm(FlaskForm):
     body = PageDownField('写文章或者提问?', validators=[DataRequired()])
     title = StringField('标题', validators=[Length(1, 20)])
 
+# 评论表单
+class CommentForm(FlaskForm):
+    body = StringField('评论', validators=[DataRequired()])
+

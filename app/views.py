@@ -1,8 +1,8 @@
 from app import app, lm
 from flask import render_template, flash, redirect, session, url_for, request, abort, make_response
 from flask_login import login_user, logout_user, current_user, login_required
-from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProfileForm, PostForm
-from .models import User, Permission, Role, Post
+from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProfileForm, PostForm, CommentForm
+from .models import User, Permission, Role, Post, Comment
 from . import db
 from datetime import datetime
 from .decorators import admin_required, permission_required
@@ -136,10 +136,27 @@ def write():
     return render_template('write.html', form=form,post=form.body.data,
                            title='写文章')
 
-@app.route('/post/<int:id>')
+@app.route('/post/<int:id>', methods=['GET','POST'])
 def post(id):
     post = Post.query.get_or_404(id)
-    return render_template('post.html', posts=[post],title=post.title)
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(body=form.body.data, post=post,
+                          author=current_user._get_current_object())
+        db.session.add(comment)
+        flash('你的评论已经发表成功。')
+        return redirect(url_for('post', id=post.id, page=-1))
+    page = request.args.get('page', 1, type=int)
+    if page == -1:
+        page = (post.comments.count() - 1) / \
+            app.config['COMMENTS_PER_PAGE'] + 1
+    pagination = post.comments.order_by(Comment.timestamp.asc()).paginate(
+        page, per_page=app.config['COMMENTS_PER_PAGE'],
+        error_out=False
+    )
+    comments = pagination.items
+    return render_template('post.html', posts=[post],title=post.title,
+                           form=form, comments=comments, pagination=pagination)
 
 # 编辑文章
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])

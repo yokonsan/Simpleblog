@@ -44,6 +44,8 @@ is_following()方法和is_followed_by()方法分别在左右两边的一对多�
 使用python manage.py shell
 >>> Role.insert_roles()
 >>> Role.query.all()
+
+Comment模型和Post模型的属性一样，但是多了个disabled字段。这是个布尔值字段，作者可以通过这个字段查禁不当评论。
 """
 
 # 关注关联表
@@ -62,6 +64,7 @@ class User(UserMixin,db.Model):
     # 关联
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    comments = db.relationship('Comment', backref='author', lazy='dynamic')
     # 个人资料
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime)
@@ -183,6 +186,7 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow)
 
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    comments = db.relationship('Comment', backref='post', lazy='dynamic')
 
     @staticmethod
     def preview_body(target, value, oldvalue, initiator):
@@ -210,4 +214,26 @@ class AnonymousUser(AnonymousUserMixin):
 
 lm.anonymous_user = AnonymousUser
 
+
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    body_html = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
+    disabled = db.Column(db.Boolean)
+
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = [
+            'a', 'abbr', 'acronym', 'b', 'code', 'em', 'img', 'i', 'strong'
+        ]
+        target.body_html = bleach.linkify(bleach.clean(
+            markdown(value, output_format='html'),
+            tags=allowed_tags, strip=True
+        ))
+db.event.listen(Comment.body, 'set', Comment.on_changed_body)
 
