@@ -11,7 +11,7 @@
     {% for follow in follows %}
     <ul>
         <li>
-            <a href="{{ url_for('user',nickname=user.nickname) }}">{{ follow.user }}</a>
+            <a href="{{ url_for('user',nickname=user.nickname) }}">{{ follow.user.nickname }}</a>
             ------{{ follow.timestamp }}
             {% if current_user.operation(Permission.FOLLOW) and user != current_user %}
                 {% if not current_user.is_following(user) %}

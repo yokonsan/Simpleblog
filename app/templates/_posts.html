@@ -4,7 +4,11 @@
 
         <td><i>{{post.author.nickname}}：</i><br>
             <a href="{{url_for('post', id=post.id)}}">{{post.title}}</a><br>
-            {{post.body}}
+            {% if post.body_html %}
+                {{ post.body_html | safe }}
+            {% else %}
+                {{post.body}}
+            {% endif %}
         </td>
         <td>
             {% if current_user == post.author %}
