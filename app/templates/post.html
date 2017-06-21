@@ -5,7 +5,64 @@
 {% for post in posts %}
 <div>{{ post.title }}</div>
 <div><a href="{{ url_for('user', nickname=post.author.nickname) }}">{{ post.author.nickname }}</a> </div>
-<div>{{ post.body }}</div>
+<div>
+    {% if post.body_html %}
+        {{ post.body_html | safe }}
+    {% else %}
+        {{post.body }}
+    {% endif %}
+</div>
 {% endfor %}
 {% endif %}
+<hr>
+<h1>评论</h1>
+<div>
+    {% if comments %}
+    {% for comment in comments %}
+    <ul>
+        <li>
+            <div>
+                <img src="{{comment.author.gravatar(size=40)}}">
+                <a href="{{url_for('user', nickname=comment.author.nickname)}}">
+                    {{ comment.author.nickname }}
+                </a>
+                ------{{ comment.timestamp }}发布
+            </div>
+            <div>
+                {% if comment.body_html %}
+                    {{ comment.body_html | safe }}
+                {% else %}
+                    {{ comment.body }}
+                {% endif %}
+            </div>
+        </li>
+    </ul>
+    {% endfor %}
+    {% endif %}
+</div>
+<div>
+    {% if comments.has_prev %}<a href="{{ url_for('index', page = comments.prev_num) }}"><<< 上一页</a>{% else %}<<< 上一页{% endif %} |
+    {% if comments.has_next %}<a href="{{ url_for('index', page = comments.next_num) }}">下一页 >>></a>{% else %}下一页 >>>{% endif %}
+</div>
+<hr>
+<form action="" method="post" name="comment">
+    {{form.hidden_tag()}}
+    <p>
+        评论<br>
+        {{form.body(size=80)}}<br>
+        {% for error in form.body.errors %}
+            <span style="color: red;">[{{error}}]</span>
+        {% endfor %}<br>
+    </p>
+    <p>
+        {% if current_user.is_authenticated %}
+        <input type="submit" value="发表">
+        {% else %}
+        <a href="{{ url_for('login') }}">
+            登录
+        </a>
+        {% endif %}
+    </p>
+</form>
+
 {% endblock %}

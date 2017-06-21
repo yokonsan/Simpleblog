@@ -5,9 +5,9 @@
         <td><i>{{post.author.nickname}}：</i><br>
             <a href="{{url_for('post', id=post.id)}}">{{post.title}}</a><br>
             {% if post.body_html %}
-                {{ post.body_html | safe }}
+                {{ post.body_html | safe | truncate(250) }}
             {% else %}
-                {{post.body}}
+                {{post.body | truncate(250)}}
             {% endif %}
         </td>
         <td>

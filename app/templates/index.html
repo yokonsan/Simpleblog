@@ -32,14 +32,14 @@
         </div>
         <div>
             <a href="{{url_for('user',nickname=post.author.nickname)}}">
-                {{post.author.username}}
+                {{post.author.nickname}}
             </a>
         </div>
         <div>
             {% if post.body_html %}
-                {{ post.body_html | safe }}
+                {{ post.body_html | safe | truncate(250) }}
             {% else %}
-                {{post.body}}
+                {{post.body | truncate(250)}}
             {% endif %}
         </div>
         <div>
