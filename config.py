@@ -25,3 +25,5 @@ ADMINS = os.environ.get('ADMINS_MAIL')
 POSTS_PER_PAGE = 10
 # 关注者分页
 FOLLOWERS_PER_PAGE = 50
+# 评论分页
+COMMENTS_PER_PAGE = 20
