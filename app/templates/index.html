@@ -1,62 +1,40 @@
 {% extends "base.html" %}
+{% import "_pages.html" as page %}
 
 {% block content %}
-<h1>
-    Hello,
-    {% if current_user.is_authenticated %}
-        {{ current_user.nickname }}
-    {% else %}
-        World
-    {% endif %}
-</h1>
-<div>
-    {% if current_user.is_authenticated %}
-    <a href="{{url_for('user', nickname=current_user.nickname)}}">
-        <img src="{{current_user.gravatar(size=40)}}">
-    </a>
-    {% endif %}
-    {% if current_user.operation(Permission.WRITE_ARTICLES) %}
-    <a href="{{url_for('write')}}">写文章</a>
-    <a href="">草稿</a>
-    {% endif %}
+<div class="jumbotron">
+    <div class="container">
+        <h3>
+        Hello,
+        {% if current_user.is_authenticated %}
+            {{ current_user.nickname }}，欢迎浏览，写篇文章吧。
+        {% else %}
+            World
+        {% endif %}
+        </h3>
+        {% if current_user.operation(Permission.WRITE_ARTICLES) %}
+        <a href="{{url_for('write')}}">
+            <button type="button" class="btn btn-default btn-sm">
+                <span class="glyphicon glyphicon-pencil"></span> 写文章
+            </button>
+        </a>
+        <a href="">
+            <button type="button" class="btn btn-default btn-sm">
+              <span class="glyphicon glyphicon-file"></span> 草稿
+            </button>
+        </a>
+        {% endif %}
+
+    </div>
 </div>
+
+
 <hr>
-<ul>
-    {% for post in posts %}
-    <li>
-        <div>
-            <a href="{{url_for('user', nickname=post.author.nickname)}}">
-                <img src="{{post.author.gravatar(size=40)}}">
-            </a>
-            <a href="{{url_for('post', id=post.id)}}">{{post.title}}</a>
-        </div>
-        <div>
-            <a href="{{url_for('user',nickname=post.author.nickname)}}">
-                {{post.author.nickname}}
-            </a>
-        </div>
-        <div>
-            {% if post.body_html %}
-                {{ post.body_html | safe | truncate(250) }}
-            {% else %}
-                {{post.body | truncate(250)}}
-            {% endif %}
-        </div>
-        <div>
-            {% if current_user == post.author %}
-            <a href="{{ url_for('edit', id=post.id) }}">
-                <span>编辑</span>
-            </a>
-            {% elif current_user.is_administrator() %}
-            <a href="{{ url_for('edit', id=post.id) }}">
-                <span>编辑【管理员】</span>
-            </a>
-            {% endif %}
-        </div>
-    </li>
-    {% endfor %}
-</ul>
-{% if posts.has_prev %}<a href="{{ url_for('index', page = posts.prev_num) }}"><<< 上一页</a>{% else %}<<< 上一页{% endif %} |
-{% if posts.has_next %}<a href="{{ url_for('index', page = posts.next_num) }}">下一页 >>></a>{% else %}下一页 >>>{% endif %}
+{% if posts %}
+
+{% include "_posts.html" %}
+
+{{ page.pages(posts, 'index') }}
+{% endif %}
 {% endblock %}
 

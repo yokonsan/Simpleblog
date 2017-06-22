@@ -1,39 +1,42 @@
 {% extends "base.html" %}
+{% import "_pages.html" as page %}
 
 {% block content %}
 {% if posts %}
 {% for post in posts %}
-<div>{{ post.title }}</div>
-<div><a href="{{ url_for('user', nickname=post.author.nickname) }}">{{ post.author.nickname }}</a> </div>
-<div>
+<h3 align="center">{{ post.title }}</h3>
+<p align="center"><a href="{{ url_for('user', nickname=post.author.nickname) }}">{{ post.author.nickname }}</a> </p>
+<p>
     {% if post.body_html %}
         {{ post.body_html | safe }}
     {% else %}
         {{post.body }}
     {% endif %}
-</div>
+</p>
 {% endfor %}
 {% endif %}
 <hr>
-<h1>评论</h1>
+<h3>评论</h3>
 <div>
     {% if comments %}
     {% for comment in comments %}
-    <ul>
-        <li>
+    <ul class="list-group">
+        <li class="list-group-item">
             <div>
-                <img src="{{comment.author.gravatar(size=40)}}">
+                <img src="{{comment.author.gravatar(size=30)}}">
                 <a href="{{url_for('user', nickname=comment.author.nickname)}}">
                     {{ comment.author.nickname }}
                 </a>
-                ------{{ comment.timestamp }}发布
+                <span class="right">{{ moment(comment.timestamp).fromNow() }}发布</span>
             </div>
-            <div>
+            <div class="comments">
+                <p>
                 {% if comment.body_html %}
                     {{ comment.body_html | safe }}
                 {% else %}
                     {{ comment.body }}
                 {% endif %}
+                </p>
             </div>
         </li>
     </ul>
@@ -41,8 +44,7 @@
     {% endif %}
 </div>
 <div>
-    {% if comments.has_prev %}<a href="{{ url_for('index', page = comments.prev_num) }}"><<< 上一页</a>{% else %}<<< 上一页{% endif %} |
-    {% if comments.has_next %}<a href="{{ url_for('index', page = comments.next_num) }}">下一页 >>></a>{% else %}下一页 >>>{% endif %}
+    {{ page.pages(comments, 'post') }}
 </div>
 <hr>
 <form action="" method="post" name="comment">
