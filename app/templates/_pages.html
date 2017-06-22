@@ -1,0 +1,24 @@
+{% macro pages(pagination, endpoint) %}
+{% if pagination.has_prev %}
+<a href="{{ url_for('endpoint', page = pagination.prev_num) }}">
+    <button type="button" class="btn btn-default btn-sm">
+      <span class="glyphicon glyphicon-arrow-left"></span> 上一页
+    </button>
+</a>
+{% else %}
+    <button type="button" class="btn btn-default btn-sm">
+      <span class="glyphicon glyphicon-arrow-left"></span> 上一页
+    </button>
+{% endif %} |
+{% if pagination.has_next %}
+<a href="{{ url_for('endpoint', page = pagination.next_num) }}">
+    <button type="button" class="btn btn-default btn-sm">
+      <span class="glyphicon glyphicon-arrow-right"></span> 下一页
+    </button>
+</a>
+{% else %}
+    <button type="button" class="btn btn-default btn-sm">
+      <span class="glyphicon glyphicon-arrow-right"></span> 下一页
+    </button>
+{% endif %}
+{% endmacro %}
