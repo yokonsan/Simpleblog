@@ -1,25 +1,46 @@
-<table>
-    <tr valign="top">
-        <td><img src="{{post.author.gravatar(50)}}"> </td>
-
-        <td><i>{{post.author.nickname}}：</i><br>
-            <a href="{{url_for('post', id=post.id)}}">{{post.title}}</a><br>
+<ul class="list-group">
+    {% for post in posts %}
+    <li class="list-group-item">
+        <table>
+        <tr>
+        <td>
+        <a href="{{url_for('user', nickname=post.author.nickname)}}">
+            <img src="{{post.author.gravatar(size=40)}}">
+        </a>
+        </td>
+        <td>
+        <a href="{{url_for('user',nickname=post.author.nickname)}}">
+            {{post.author.nickname}}
+        </a>
+        </td>
+        </tr>
+        <tr>
+        <td></td>
+        <td>
+        <h5>
+            <a href="{{url_for('post', id=post.id)}}">{{post.title}}</a>
+        </h5>
+        <p>
             {% if post.body_html %}
                 {{ post.body_html | safe | truncate(250) }}
             {% else %}
                 {{post.body | truncate(250)}}
             {% endif %}
-        </td>
-        <td>
+        </p>
+        <p>
             {% if current_user == post.author %}
-            <a href="{{ url_for('edit', id=post.id) }}">
-                <span>编辑</span>
+            <a class="btn" href="{{ url_for('edit', id=post.id) }}">
+                <span>编辑 >></span>
             </a>
             {% elif current_user.is_administrator() %}
-            <a href="{{ url_for('edit', id=post.id) }}">
+            <a class="btn" href="{{ url_for('edit', id=post.id) }}">
                 <span>编辑【管理员】</span>
             </a>
             {% endif %}
+        </p>
         </td>
-    </tr>
-</table>
+        </tr>
+        </table>
+    </li>
+    {% endfor %}
+</ul>
