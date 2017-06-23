@@ -155,7 +155,7 @@ def post(id):
         error_out=False
     )
     comments = pagination.items
-    return render_template('post.html', posts=[post],title=post.title,
+    return render_template('post.html', posts=[post],title=post.title,id=id,post=post,
                            form=form, comments=comments, pagination=pagination)
 
 # 编辑文章
@@ -227,6 +227,9 @@ def follows(nickname):
     show_followed = False
     if current_user.is_authenticated:
         show_followed = bool(request.cookies.get('show_followed',''))
+        posts = current_user.followed_posts
+    else:
+        posts = Post.query
     if show_followed:
         follows = [{'user': i.follower, 'timestamp': i.timestamp}
                    for i in pagination.items]
@@ -238,8 +241,8 @@ def follows(nickname):
                            title='关注',
                            show_followed=show_followed,
                            pagination=pagination,
-                           pagination2=pagination2,
                            Permission=Permission,
+                           posts=posts,
                            follows=follows)
 
 @app.route('/followers/<nickname>')

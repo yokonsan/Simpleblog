@@ -1,33 +1,53 @@
 {% extends "base.html" %}
+{% import "_pages.html" as page %}
 
 {% block content %}
-<div class="follow">
-    <ul>
-        <li {% if not show_followed %}class="active"{% endif %}><a href="{{ url_for('show_follower',nickname=user.nickname) }}">关注者</a></li>
-        {% if current_user.is_authenticated %}
-        <li {% if show_followed %}class="active"{% endif %}><a href="{{ url_for('show_followed',nickname=user.nickname) }}">关注了</a></li>
-        {% endif %}
-    </ul>
-    {% for follow in follows %}
-    <ul>
-        <li>
-            <a href="{{ url_for('user',nickname=user.nickname) }}">{{ follow.user.nickname }}</a>
-            ------{{ follow.timestamp }}
-            {% if current_user.operation(Permission.FOLLOW) and user != current_user %}
-                {% if not current_user.is_following(user) %}
-                <a href="{{ url_for('follow', nickname=user.nickname) }}">关注</a>
-                {% else %}
-                <a href="{{ url_for('unfollow', nickname=user.nickname) }}">取消关注</a>
+<div class="row clearfix">
+    <div class="col-md-8 column">
+        <ul class="nav nav-tabs">
+            <li {% if show_followed %}class="active"{% endif %}>
+                 <a href="{{ url_for('show_follower',nickname=user.nickname) }}">粉丝</a>
+            </li>
+            <li {% if not show_followed %}class="active"{% endif %}>
+                 <a href="{{ url_for('show_followed',nickname=user.nickname) }}">关注</a>
+            </li>
+        </ul>
+        <br>
+        {% for follow in follows %}
+        <ul class="list-group">
+            <li class="list-group-item">
+                <a href="{{ url_for('user',nickname=follow.user.nickname) }}">{{ follow.user.nickname }}</a>
+                <span class="right">{{ moment(follow.timestamp).fromNow() }}</span>
+                {% if current_user.operation(Permission.FOLLOW) and user != current_user %}
+                    {% if not current_user.is_following(user) %}
+                    <a class="right" href="{{ url_for('follow', nickname=user.nickname) }}">取消关注</a>
+                    {% else %}
+                    <a class="right" href="{{ url_for('unfollow', nickname=user.nickname) }}">关注</a>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-        </li>
-    </ul>
-    {% endfor %}
+            </li>
+        </ul>
+        {% endfor %}
+        <div class="pagination">
+            {{ page.pages(pagination, 'follows', nickname=user.nickname) }}
+        </div>
+    </div>
+    <div class="col-md-1 column">
+    </div>
+    <div class="col-md-3 column">
+
+        {% if current_user.is_authenticated %}
+        <h4>关注者文章</h4>
+        {% else %}
+        <h4>推荐文章</h4>
+        {% endif %}
+        <hr>
+        <p>
+
+            {{ posts.title }}
+
+        </p>
+    </div>
 </div>
-{% if pagination %}
-<div>
-    {% if follows.has_prev %}<a href="{{ url_for('index', page = follows.prev_num) }}"><<< 上一页</a>{% else %}<<< 上一页{% endif %} |
-    {% if follows.has_next %}<a href="{{ url_for('index', page = follows.next_num) }}">下一页 >>></a>{% else %}下一页 >>>{% endif %}
-</div>
-{% endif %}
+
 {% endblock %}

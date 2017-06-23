@@ -33,8 +33,9 @@
 {% if posts %}
 
 {% include "_posts.html" %}
-
-{{ page.pages(posts, 'index') }}
+<div class="pagination">
+{{ page.pages(pagination, 'index') }}
+</div>
 {% endif %}
 {% endblock %}
 

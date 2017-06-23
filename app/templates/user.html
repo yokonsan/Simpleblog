@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% import "_pages.html" as page %}
 
 {% block content %}
 <table>
@@ -33,10 +32,10 @@
                 {% endif %}
             {% endif %}
             <a href="{{ url_for('follows', nickname=user.nickname) }}">
-                关注者：
+                粉丝：
             </a><span>{{ user.followers.count() }}</span>
             <a href="{{ url_for('follows', nickname=user.nickname) }}">
-                关注了：
+                关注：
             </a><span>{{ user.followed.count() }}</span>
             {% if current_user.is_authenticated and user != current_user and
                 user.is_following(current_user) %}
@@ -47,11 +46,6 @@
 </table>
 <hr>
 {% if posts %}
-
 {% include "_posts.html" %}
-
-{{ page.pages(posts, 'user') }}
-
 {% endif %}
-
 {% endblock %}

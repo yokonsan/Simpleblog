@@ -28,6 +28,12 @@ cascade参数的值是一组由逗号分隔的层叠选项，all表示除了dale
 意思是启用所有默认层叠选项，而且还要删除孤记录。
 is_following()方法和is_followed_by()方法分别在左右两边的一对多关系中搜索指定用户，如果找到就返回True
 
+获取关注用户的文章：
+    db.session.query(Post)指明这个查询要返回Post对象
+    select_from(Follow)的意思是这个查询从Follow模型开始
+    filter_by(follower_id=self.id)使用关注用户过滤follows表
+    join(Post, Follow.followed_id==Post.author_id)联结filter_by()得到的结果和Post对象
+
 角色模型的permissions字段的值是一个整数，表示位标志。各操作都对应一个位位置，能执行某项操作的角色，其位会被设为1
 程序权限：
     关注用户：0x01  
@@ -40,7 +46,7 @@ is_following()方法和is_followed_by()方法分别在左右两边的一对多�
     用户：0x07 具有发布文章，提问，评论和关注用户的权限，默认角色
     小管家：0x0f 审查不当评论的权限
     管理员：0xff 有所有权限，包括修改用户角色权限
-创建数据库后，需要创建用户角色。
+创建数据库后，需要创建用户角色,先更新数据库，然后：
 使用python manage.py shell
 >>> Role.insert_roles()
 >>> Role.query.all()
@@ -111,6 +117,12 @@ class User(UserMixin,db.Model):
         return self.followed.filter_by(followed_id=user.id).first() is not None
     def is_followed_by(self, user):
         return self.followers.filter_by(follower_id=user.id).first() is not None
+
+    # 获取关注者文章
+    @staticmethod
+    def followed_posts(self):
+        return Post.query.join(Follow, Follow.followed_id==Post.author_id.filter(
+            Follow.follower_id==self.id))
 
     # python内置装饰器，把一个方法变为属性调用
     @property

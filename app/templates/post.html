@@ -16,7 +16,7 @@
 {% endfor %}
 {% endif %}
 <hr>
-<h3>评论</h3>
+<h3><i>{{ post.comments.count() }}条评论</i></h3>
 <div>
     {% if comments %}
     {% for comment in comments %}
@@ -26,7 +26,7 @@
                 <img src="{{comment.author.gravatar(size=30)}}">
                 <a href="{{url_for('user', nickname=comment.author.nickname)}}">
                     {{ comment.author.nickname }}
-                </a>
+                </a>:
                 <span class="right">{{ moment(comment.timestamp).fromNow() }}发布</span>
             </div>
             <div class="comments">
@@ -43,8 +43,8 @@
     {% endfor %}
     {% endif %}
 </div>
-<div>
-    {{ page.pages(comments, 'post') }}
+<div class="pagination">
+    {{ page.pages(pagination, 'post', fragment='#comments', id=posts[0].id) }}
 </div>
 <hr>
 <form action="" method="post" name="comment">
