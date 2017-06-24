@@ -155,8 +155,28 @@ def post(id):
         error_out=False
     )
     comments = pagination.items
-    return render_template('post.html', posts=[post],title=post.title,id=id,post=post,
+    return render_template('post.html', posts=[post],title=post.title,id=post.id,post=post,
                            form=form, comments=comments, pagination=pagination)
+
+# 管理评论
+# 恢复评论，即是将Comment模型的disabled的布尔值设为Flase
+@app.route('/recover/<int:id>')
+@login_required
+def recover(id):
+    comment = Comment.query.get_or_404(id)
+    post_id = comment.post_id
+    comment.disabled = False
+    db.session.add(comment)
+    return redirect(url_for('post',id=post_id))
+# 删除评论
+@app.route('/delate/<int:id>')
+@login_required
+def delate(id):
+    comment = Comment.query.get_or_404(id)
+    post_id = comment.post_id
+    comment.disabled = True
+    db.session.add(comment)
+    return redirect(url_for('post',id=post_id))
 
 # 编辑文章
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
