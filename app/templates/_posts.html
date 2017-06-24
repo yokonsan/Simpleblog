@@ -3,7 +3,7 @@
     <tr>
     <td>
     <a href="{{url_for('user', nickname=post.author.nickname)}}">
-        <img src="{{post.author.gravatar(size=40)}}">
+        <img class="images" src="{{post.author.gravatar(size=40)}}">
     </a>
     </td>
     <td>
@@ -16,7 +16,7 @@
     <td></td>
     <td>
     <h5>
-        <a href="{{url_for('post', id=post.id)}}">{{post.title}}</a>
+        <a href="{{url_for('post', id=post.id)}}"><h4>{{post.title}}</h4></a>
     </h5>
     <p>
         {% if post.body_html %}

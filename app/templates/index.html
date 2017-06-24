@@ -11,13 +11,13 @@
         {% else %}
             World
         {% endif %}
-        </h3>
+        </h3><br>
         {% if current_user.operation(Permission.WRITE_ARTICLES) %}
         <a href="{{url_for('write')}}">
             <button type="button" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-pencil"></span> 写文章
             </button>
-        </a>
+        </a> |
         <a href="">
             <button type="button" class="btn btn-default btn-sm">
               <span class="glyphicon glyphicon-file"></span> 草稿
@@ -27,8 +27,6 @@
 
     </div>
 </div>
-
-
 <hr>
 {% if posts %}
 

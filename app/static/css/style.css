@@ -1,7 +1,11 @@
-/*通用*/
+/*自己的样式*/
 .right{
+    margin: 0 5px 0 5px;
     float: right;
 }
 .comments{
     text-indent: 35px;
+}
+.images{
+    margin-right: 20px;
 }

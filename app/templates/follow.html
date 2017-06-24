@@ -35,18 +35,13 @@
     <div class="col-md-1 column">
     </div>
     <div class="col-md-3 column">
-
-        {% if current_user.is_authenticated %}
-        <h4>关注者文章</h4>
-        {% else %}
         <h4>推荐文章</h4>
-        {% endif %}
         <hr>
-        <p>
-
-            {{ posts.title }}
-
-        </p>
+        {% for post in user.posts %}
+        <a href="{{ url_for('post', id=post.id) }}">
+            {{ post.title }}
+        </a><hr>
+        {% endfor %}
     </div>
 </div>
 

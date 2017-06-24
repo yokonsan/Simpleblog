@@ -3,7 +3,7 @@
 {% block content %}
 <table>
     <tr valign="top">
-        <td><img src="{{user.gravatar(130)}}"></td>
+        <td><img class="images" src="{{user.gravatar(200)}}"></td>
         <td>
             <h1>{{user.nickname}}的资料</h1>
             {% if user.about_me %}<p>{{user.about_me}}</p>{% endif %}

@@ -16,10 +16,12 @@
 {% endfor %}
 {% endif %}
 <hr>
+<!-- 评论管理，如果是本文作者，可以删除或者回复用户评论，其他用户将看不到被删除的评论 -->
 <h3><i>{{ post.comments.count() }}条评论</i></h3>
 <div>
     {% if comments %}
     {% for comment in comments %}
+    {% if not comment.disabled %}
     <ul class="list-group">
         <li class="list-group-item">
             <div>
@@ -27,7 +29,13 @@
                 <a href="{{url_for('user', nickname=comment.author.nickname)}}">
                     {{ comment.author.nickname }}
                 </a>:
+                {% if current_user.nickname == post.author.nickname %}
+                    <h4><span class="right label label-danger">
+                        <a href="{{ url_for('delate',id=comment.id) }}">删除</a>
+                    </span></h4>
+                {% endif %}
                 <span class="right">{{ moment(comment.timestamp).fromNow() }}发布</span>
+                <span class="right"><a href="">回复</a> </span>
             </div>
             <div class="comments">
                 <p>
@@ -40,9 +48,37 @@
             </div>
         </li>
     </ul>
+    {% else %}
+        {% if current_user.nickname == post.author.nickname %}
+        <ul class="list-group">
+            <li class="list-group-item">
+                <div>
+                    <img src="{{comment.author.gravatar(size=30)}}">
+                    <a href="{{url_for('user', nickname=comment.author.nickname)}}">
+                        {{ comment.author.nickname }}
+                    </a>:
+                        <h4><span class="right label label-default">
+                            <a href="{{ url_for('recover',id=comment.id) }}">恢复</a>
+                        </span></h4>
+                    <span class="right">{{ moment(comment.timestamp).fromNow() }}发布</span>
+                </div>
+                <div class="comments">
+                    <p>
+                    {% if comment.body_html %}
+                        {{ comment.body_html | safe }}
+                    {% else %}
+                        {{ comment.body }}
+                    {% endif %}
+                    </p>
+                </div>
+            </li>
+        </ul>
+        {% endif %}
+    {% endif %}
     {% endfor %}
     {% endif %}
 </div>
+
 <div class="pagination">
     {{ page.pages(pagination, 'post', fragment='#comments', id=posts[0].id) }}
 </div>
@@ -50,7 +86,7 @@
 <form action="" method="post" name="comment">
     {{form.hidden_tag()}}
     <p>
-        评论<br>
+        <h4>评论</h4>
         {{form.body(size=80)}}<br>
         {% for error in form.body.errors %}
             <span style="color: red;">[{{error}}]</span>
@@ -66,5 +102,4 @@
         {% endif %}
     </p>
 </form>
-
 {% endblock %}
