@@ -2,8 +2,8 @@
 {% import "_pages.html" as page %}
 
 {% block content %}
-<div class="jumbotron">
-    <div class="container">
+<div class="panel panel-warning">
+    <div class="panel-heading">
         <h3>
         Hello,
         {% if current_user.is_authenticated %}
@@ -24,7 +24,6 @@
             </button>
         </a>
         {% endif %}
-
     </div>
 </div>
 <hr>

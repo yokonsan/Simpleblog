@@ -58,5 +58,12 @@ class PostForm(FlaskForm):
 
 # 评论表单
 class CommentForm(FlaskForm):
-    body = StringField('评论', validators=[DataRequired()])
+    body = PageDownField('评论', validators=[DataRequired()])
 
+# 回复表单
+class ReplyForm(FlaskForm):
+    body = PageDownField('回复', validators=[DataRequired()])
+
+# 搜索表单
+class SearchForm(FlaskForm):
+    search = StringField('搜索', validators=[DataRequired()])

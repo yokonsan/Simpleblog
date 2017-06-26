@@ -7,18 +7,18 @@
     {{form.hidden_tag()}}
     <p>
         登录邮箱<br>
-        {{form.email(size=80)}}<br>
+        {{form.email(class="form-control")}}<br>
         {% for error in form.email.errors %}
             <span style="color: red;">[{{error}}]</span>
         {% endfor %}<br>
         登录密码<br>
-        {{form.password(size=80)}}<br>
+        {{form.password(class="form-control")}}<br>
         {% for error in form.password.errors %}
             <span style="color: red;">[{{error}}]</span>
         {% endfor %}<br>
     </p>
     <p>{{form.remember_me}} 记住我</p>
-    <p><input type="submit" value="登录"></p>
+    <p><input type="submit" class="btn btn-default" value="登录"></p>
 
     <p>
         新用户？

@@ -2,6 +2,7 @@
 {% import "_pages.html" as page %}
 
 {% block content %}
+<div>
 {% if posts %}
 {% for post in posts %}
 <h3 align="center">{{ post.title }}</h3>
@@ -35,7 +36,7 @@
                     </span></h4>
                 {% endif %}
                 <span class="right">{{ moment(comment.timestamp).fromNow() }}发布</span>
-                <span class="right"><a href="">回复</a> </span>
+                <span class="right"><a href="#">回复</a> </span>
             </div>
             <div class="comments">
                 <p>
@@ -47,6 +48,22 @@
                 </p>
             </div>
         </li>
+        {% if reply %}
+        <li>
+            <div>
+                <form action="" method="post" name="reply">
+                {{form.hidden_tag()}}
+                {{form.body(class="form-control",rows="3")}}<br>
+                {% for error in form.body.errors %}
+                    <span style="color: red;">[{{error}}]</span>
+                {% endfor %}<br>
+                <p>
+                    <input type="submit" value="发表">
+                </p>
+                </form>
+            </div>
+        </li>
+        {% endif %}
     </ul>
     {% else %}
         {% if current_user.nickname == post.author.nickname %}
@@ -85,21 +102,20 @@
 <hr>
 <form action="" method="post" name="comment">
     {{form.hidden_tag()}}
-    <p>
-        <h4>评论</h4>
-        {{form.body(size=80)}}<br>
-        {% for error in form.body.errors %}
-            <span style="color: red;">[{{error}}]</span>
-        {% endfor %}<br>
-    </p>
+    <h4>评论</h4>
+    {{form.body(class="form-control",rows="3")}}<br>
+    {% for error in form.body.errors %}
+        <span style="color: red;">[{{error}}]</span>
+    {% endfor %}<br>
     <p>
         {% if current_user.is_authenticated %}
         <input type="submit" value="发表">
         {% else %}
         <a href="{{ url_for('login') }}">
-            登录
+            <h4>还没有登录哦，前往登录</h4>
         </a>
         {% endif %}
     </p>
 </form>
+</div>
 {% endblock %}

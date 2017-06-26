@@ -7,27 +7,27 @@
     {{form.hidden_tag()}}
     <p>
         昵称<br>
-        {{form.nickname(size=80)}}<br>
+        {{form.nickname(class="form-control")}}<br>
         {% for error in form.nickname.errors %}
             <span style="color: red;">{{error}}</span>
         {% endfor %}<br>
         邮箱<br>
-        {{form.email(size=80)}}<br>
+        {{form.email(class="form-control")}}<br>
         {% for error in form.email.errors %}
             <span style="color: red;">[{{error}}]</span>
         {% endfor %}<br>
         密码<br>
-        {{form.password(size=80)}}<br>
+        {{form.password(class="form-control")}}<br>
         {% for error in form.password.errors %}
             <span style="color: red;">{{error}}</span>
         {% endfor %}<br>
         确认密码<br>
-        {{form.password2(size=80)}}<br>
+        {{form.password2(class="form-control")}}<br>
         {% for error in form.password2.errors %}
             <span style="color: red;">{{error}}</span>
         {% endfor %}<br>
     </p>
-    <p><input type="submit" value="注册"></p>
+    <p><input type="submit" class="btn btn-default" value="注册"></p>
     <p>
         <a href="{{ url_for('login') }}">已有账户，前往登录</a>
     </p>

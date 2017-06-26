@@ -37,9 +37,10 @@
                             {% endif %}
 						</li>
 					</ul>
-					<form class="navbar-form navbar-left" role="search">
+					<form class="navbar-form navbar-left" method="post" action="{{url_for('search')}}" role="search">
+						{{ g.search_form.hidden_tag() }}
 						<div class="form-group">
-							<input type="text" class="form-control">
+							{{g.search_form.search(class="form-control")}}
 						</div>
 						<button type="submit" class="btn btn-default">
 							搜索
@@ -79,22 +80,23 @@
 			</nav>
 		</div>
 	</div>
-	<br><br><br>
+	<br><br>
 	<div class="row clearfix">
 		<div class="col-md-2 column">
 		</div>
 		<div class="col-md-8 column">
-            <hr>
+            <br>
             {% with messages = get_flashed_messages() %}
             {% if messages %}
-            <ul>
             {% for message in messages %}
-                <li><div class="alert alert-warning">{{message}}</div></li>
+			<div id="myAlert" class="alert alert-success">
+				<a href="#" class="close" data-dismiss="alert">&times;</a>
+				<strong>{{ message }}</strong>
+			</div>
             {% endfor %}
-            </ul>
             {% endif %}
             {% endwith %}
-            <div>
+            <div class="main">
                 {% block content %}
                 {% endblock %}
             </div>
