@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_pagedown import PageDown
 from flask_moment import Moment
+from flask_whooshee import Whooshee
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -20,6 +21,9 @@ pagedown.init_app(app)
 
 moment = Moment()
 moment.init_app(app)
+
+whooshee = Whooshee(app)
+whooshee.init_app(app)
 
 if not app.debug:
     import logging
