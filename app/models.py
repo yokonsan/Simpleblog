@@ -1,11 +1,17 @@
 import datetime
-from app import db, lm, app
+from app import db, lm, app, whooshee
 from flask_login import UserMixin, AnonymousUserMixin
 from hashlib import md5
 from werkzeug.security import generate_password_hash, check_password_hash
 from markdown import markdown
 import bleach
 
+# import sys
+# if sys.version_info >= (3, 0):
+#     enable_search = False
+# else:
+#     enable_search = True
+#     import flask_whooshalchemy as whooshalchemy
 
 """
 generate_password_hash(password, method=pbkdf2:sha1, salt_length=8):这个函数将原始密码作为输入，
@@ -71,6 +77,7 @@ class User(UserMixin,db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     comments = db.relationship('Comment', backref='author', lazy='dynamic')
+    # reply_comments = db.relationship('Reply', backref='author', lazy='dynamic')
     # 个人资料
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime)
@@ -188,9 +195,10 @@ class Permission:
     MODERATE_COMMENTS = 0x08
     ADMINISTER = 0x80
 
-
+@whooshee.register_model('title','body')
 class Post(db.Model):
     __tablename__ = 'posts'
+    # __searchable__ = ['body']
     id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String(64))
     body = db.Column(db.Text)
@@ -199,6 +207,7 @@ class Post(db.Model):
 
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     comments = db.relationship('Comment', backref='post', lazy='dynamic')
+    # reply_comments = db.relationship('Reply', backref='post', lazy='dynamic')
 
     @staticmethod
     def preview_body(target, value, oldvalue, initiator):
@@ -214,8 +223,10 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<Post %r>' % (self.body)
-
 db.event.listen(Post.body, 'set', Post.preview_body)
+# if enable_search:
+#     whooshalchemy.whoosh_index(app, Post)
+
 # 检验用户权限对应的类
 class AnonymousUser(AnonymousUserMixin):
     def operation(self, permissions):
@@ -237,6 +248,12 @@ class Comment(db.Model):
 
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    # reply_comment = db.relationship('Reply', backref='comment', lazy='dynamic')
+
+    # 回复
+    def reply(self,comment):
+
+        pass
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
@@ -249,3 +266,25 @@ class Comment(db.Model):
         ))
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
 
+# class Reply(db.Model):
+#     __tablename__ = 'replys'
+#     id = db.Column(db.Integer, primary_key=True)
+#     body = db.Column(db.Text)
+#     body_html = db.Column(db.Text)
+#     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
+#     disabled = db.Column(db.Boolean)
+#
+#     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+#     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+#     comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
+#
+#     @staticmethod
+#     def on_changed_body(target, value, oldvalue, initiator):
+#         allowed_tags = [
+#             'a', 'abbr', 'acronym', 'b', 'code', 'em', 'img', 'i', 'strong'
+#         ]
+#         target.body_html = bleach.linkify(bleach.clean(
+#             markdown(value, output_format='html'),
+#             tags=allowed_tags, strip=True
+#         ))
+# db.event.listen(Reply.body, 'set', Reply.on_changed_body)

@@ -1,7 +1,8 @@
 from app import app, lm
-from flask import render_template, flash, redirect, session, url_for, request, abort, make_response
+from flask import render_template, flash, redirect, session, url_for, request, abort, make_response, g
 from flask_login import login_user, logout_user, current_user, login_required
-from .forms import LoginForm, RegisterForm, ChangePasswordForm, ProfileForm, PostForm, CommentForm
+from .forms import LoginForm, RegisterForm, ChangePasswordForm, \
+        ProfileForm, PostForm, CommentForm, ReplyForm, SearchForm
 from .models import User, Permission, Role, Post, Comment
 from . import db
 from datetime import datetime
@@ -19,10 +20,7 @@ def internal_error(error):
 
 @app.route('/')
 @app.route('/index')
-# @login_required
 def index():
-    # posts = Post.query.order_by(Post.timestamp.desc()).all()
-    # pages
     page = request.args.get('page', 1, type=int)
     pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
         page, per_page=app.config['POSTS_PER_PAGE'],
@@ -83,7 +81,7 @@ def change_password():
                            title='更改密码')
 
 @app.route('/user/<nickname>')
-@login_required
+# @login_required
 def user(nickname):
     user = User.query.filter_by(nickname = nickname).first()
     if user == None:
@@ -96,13 +94,14 @@ def user(nickname):
                            Permission=Permission,
                            title='个人资料')
 
-# 用户最后一次访问时间
+# 用户最后一次访问时间,全文搜索
 @app.before_request
 def before_request():
     if current_user.is_authenticated:
         current_user.last_seen = datetime.now()
         db.session.add(current_user)
         db.session.commit()
+    g.search_form = SearchForm()
 
 # 编辑用户资料
 @app.route('/editprofile', methods=['GET','POST'])
@@ -138,6 +137,7 @@ def write():
 
 @app.route('/post/<int:id>', methods=['GET','POST'])
 def post(id):
+    # 评论
     post = Post.query.get_or_404(id)
     form = CommentForm()
     if form.validate_on_submit():
@@ -156,7 +156,26 @@ def post(id):
     )
     comments = pagination.items
     return render_template('post.html', posts=[post],title=post.title,id=post.id,post=post,
-                           form=form, comments=comments, pagination=pagination)
+                           form=form, comments=comments,
+                           pagination=pagination)
+
+# # 交互回复评论
+# @app.route('/reply/<int:id>', methods=['GET','POST'])
+# @login_required
+# def reply(id):
+#     comment = Comment.query.get_or_404(id)
+#     page = request.args.get('page', 1, type=int)
+#     form = ReplyForm()
+#     if form.validate_on_submit():
+#         reply_comment = Comment(body=form.body.data,
+#                             post=post,
+#                             comment=comment,
+#                             author=current_user._get_current_object())
+#         db.session.add(reply_comment)
+#         flash('你的回复已经发表。')
+#         return redirect(url_for('post', id=post.id, page=page))
+#     return render_template('reply.html', form=form, title='回复')
+
 
 # 管理评论
 # 恢复评论，即是将Comment模型的disabled的布尔值设为Flase
@@ -225,7 +244,7 @@ def unfollow(nickname):
         flash('你已经取消了此用户的关注。')
         return redirect(url_for('.user', nickname=nickname))
     current_user.unfollow(user)
-    flash('你已取消关注 %s anymore.' % nickname)
+    flash('你已取消关注 %s 。' % nickname)
     return redirect(url_for('user', nickname=nickname))
 
 
@@ -275,4 +294,17 @@ def show_followed(nickname):
     resp = make_response(redirect(url_for('follows',nickname=nickname)))
     resp.set_cookie('show_followed','',max_age=30*24*60*60)
     return resp
+
+# 全文搜索
+@app.route('/search', methods=['GET','POST'])
+def search():
+    if not g.search_form.validate_on_submit():
+        return redirect(url_for('index'))
+    return redirect(url_for('search_results', query=g.search_form.search.data))
+# 搜索结果
+@app.route('/search_results/<query>')
+def search_results(query):
+    results = Post.query.whooshee_search(query).all()
+    return render_template('search_results.html',query=query,
+                           title='搜索结果',posts=results)
 

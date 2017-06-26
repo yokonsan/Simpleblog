@@ -3,5 +3,4 @@
 dist
 build
 __pycache__
-webapp/.idea/workspace.xml
-webapp/__pycache__/config.cpython-35.pyc
+whooshee
