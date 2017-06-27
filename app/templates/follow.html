@@ -32,16 +32,19 @@
             {{ page.pages(pagination, 'follows', nickname=user.nickname) }}
         </div>
     </div>
-    <div class="col-md-1 column">
-    </div>
-    <div class="col-md-3 column">
-        <h4>推荐文章</h4>
-        <hr>
-        {% for post in user.posts %}
-        <a href="{{ url_for('post', id=post.id) }}">
-            {{ post.title }}
-        </a><hr>
-        {% endfor %}
+    <div class="col-md-4 column">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h4 class="panel-title">推荐文章</h4>
+            </div>
+            <div class="panel-body">
+                {% for post in user.posts %}
+                <a href="{{ url_for('post', id=post.id) }}">
+                    {{ post.title }}
+                </a><hr>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 

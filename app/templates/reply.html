@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h4>回复{{ nickname }}</h4>
+<form action="" method="post" name="reply">
+{{form.hidden_tag()}}
+{{form.body(class="form-control",rows="3")}}<br>
+{% for error in form.body.errors %}
+    <span style="color: red;">[{{error}}]</span>
+{% endfor %}<br>
+<p>
+    <input type="submit" value="发表">
+</p>
+</form>
+{% endblock %}

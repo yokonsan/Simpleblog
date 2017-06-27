@@ -11,11 +11,13 @@ body{
     padding: 40px;
     background: #fcfcf7;
     box-shadow: 0px 1px 4px rgba(0,0,0,0.1);
-
 }
 .comments{
     text-indent: 35px;
 }
 .images{
     margin-right: 20px;
+}
+.taga{
+    color: #dde6ef;
 }
