@@ -155,26 +155,28 @@ def post(id):
         error_out=False
     )
     comments = pagination.items
-    return render_template('post.html', posts=[post],title=post.title,id=post.id,post=post,
+    return render_template('post.html', posts=[post],
+                           title=post.title,id=post.id,post=post,
                            form=form, comments=comments,
                            pagination=pagination)
 
-# # 交互回复评论
-# @app.route('/reply/<int:id>', methods=['GET','POST'])
-# @login_required
-# def reply(id):
-#     comment = Comment.query.get_or_404(id)
-#     page = request.args.get('page', 1, type=int)
-#     form = ReplyForm()
-#     if form.validate_on_submit():
-#         reply_comment = Comment(body=form.body.data,
-#                             post=post,
-#                             comment=comment,
-#                             author=current_user._get_current_object())
-#         db.session.add(reply_comment)
-#         flash('你的回复已经发表。')
-#         return redirect(url_for('post', id=post.id, page=page))
-#     return render_template('reply.html', form=form, title='回复')
+# 交互回复评论
+@app.route('/reply/<int:id>', methods=['GET','POST'])
+@login_required
+def reply(id):
+    comment = Comment.query.get_or_404(id)
+    post = Post.query.get_or_404(comment.post_id)
+    page = request.args.get('page', 1, type=int)
+    form = ReplyForm()
+    if form.validate_on_submit():
+        reply_comment = Comment(body=form.body.data,
+                            post=post,comment_type='reply',
+                            reply_to=comment.author.nickname,
+                            author=current_user._get_current_object())
+        db.session.add(reply_comment)
+        flash('你的回复已经发表。')
+        return redirect(url_for('post', id=comment.post_id, page=page))
+    return render_template('reply.html', form=form, nickname=comment.author.nickname, title='回复')
 
 
 # 管理评论

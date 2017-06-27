@@ -245,15 +245,12 @@ class Comment(db.Model):
     body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
     disabled = db.Column(db.Boolean)
+    comment_type = db.Column(db.String(64), default='comment')
+    reply_to = db.Column(db.String(128), default='notReply')
 
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     # reply_comment = db.relationship('Reply', backref='comment', lazy='dynamic')
-
-    # 回复
-    def reply(self,comment):
-
-        pass
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
@@ -265,26 +262,3 @@ class Comment(db.Model):
             tags=allowed_tags, strip=True
         ))
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
-
-# class Reply(db.Model):
-#     __tablename__ = 'replys'
-#     id = db.Column(db.Integer, primary_key=True)
-#     body = db.Column(db.Text)
-#     body_html = db.Column(db.Text)
-#     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
-#     disabled = db.Column(db.Boolean)
-#
-#     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-#     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-#     comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
-#
-#     @staticmethod
-#     def on_changed_body(target, value, oldvalue, initiator):
-#         allowed_tags = [
-#             'a', 'abbr', 'acronym', 'b', 'code', 'em', 'img', 'i', 'strong'
-#         ]
-#         target.body_html = bleach.linkify(bleach.clean(
-#             markdown(value, output_format='html'),
-#             tags=allowed_tags, strip=True
-#         ))
-# db.event.listen(Reply.body, 'set', Reply.on_changed_body)
