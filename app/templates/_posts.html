@@ -1,43 +1,42 @@
- {% for post in posts %}
-    <table>
-    <tr>
-    <td>
-    <a href="{{url_for('user', nickname=post.author.nickname)}}">
-        <img class="images" src="{{post.author.gravatar(size=40)}}">
+<table>
+<tr>
+<td>
+<a href="{{url_for('user', nickname=post.author.nickname)}}">
+    <img class="images" src="{{post.author.gravatar(size=40)}}">
+</a>
+</td>
+<td>
+<a href="{{url_for('user',nickname=post.author.nickname)}}">
+    {{post.author.nickname}}
+</a>
+    <i class="right">浏览：<span class="badge">{{ post.view_num }}</span></i>
+    <i class="right">评论：<span class="badge">{{ post.comments.count() }}</span></i>
+</td>
+</tr>
+<tr>
+<td></td>
+<td>
+<h5>
+    <a href="{{url_for('post', id=post.id)}}"><h4>{{post.title}}</h4></a>
+</h5>
+<p>
+    {% if post.body_html %}
+        {{ post.body_html | safe | truncate(250) }}
+    {% else %}
+        {{post.body | truncate(250)}}
+    {% endif %}
+</p>
+<p>
+    {% if current_user == post.author %}
+    <a class="btn" href="{{ url_for('edit', id=post.id) }}">
+        <span>编辑 >></span>
     </a>
-    </td>
-    <td>
-    <a href="{{url_for('user',nickname=post.author.nickname)}}">
-        {{post.author.nickname}}
+    {% elif current_user.is_administrator() %}
+    <a class="btn" href="{{ url_for('edit', id=post.id) }}">
+        <span>编辑【管理员】</span>
     </a>
-    </td>
-    </tr>
-    <tr>
-    <td></td>
-    <td>
-    <h5>
-        <a href="{{url_for('post', id=post.id)}}"><h4>{{post.title}}</h4></a>
-    </h5>
-    <p>
-        {% if post.body_html %}
-            {{ post.body_html | safe | truncate(250) }}
-        {% else %}
-            {{post.body | truncate(250)}}
-        {% endif %}
-    </p>
-    <p>
-        {% if current_user == post.author %}
-        <a class="btn" href="{{ url_for('edit', id=post.id) }}">
-            <span>编辑 >></span>
-        </a>
-        {% elif current_user.is_administrator() %}
-        <a class="btn" href="{{ url_for('edit', id=post.id) }}">
-            <span>编辑【管理员】</span>
-        </a>
-        {% endif %}
-    </p>
-    </td>
-    </tr>
-    </table>
-    <hr>
- {% endfor %}
+    {% endif %}
+</p>
+</td>
+</tr>
+</table>

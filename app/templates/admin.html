@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="panel panel-default">
+	<div class="panel-heading">管理员后台</div>
+	<div class="panel-body">
+		<h4>
+			你好啊，管理员。这里是简单的管理界面，目前可以实现的管理功能如下。
+		</h4>
+	</div>
+	<ul class="list-group">
+		<li class="list-group-item">
+			<a href="{{ url_for('admin_post') }}">管理文章</a>
+		</li>
+		<li class="list-group-item">
+			<a href="{{ url_for('admin_comment') }}">管理评论</a>
+		</li>
+	</ul>
+</div>
+{% endblock %}

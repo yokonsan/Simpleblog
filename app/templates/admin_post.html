@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% import "_pages.html" as page %}
+
+{% block content %}
+<h3>
+    <i>管理文章 <span class="badge">{{ nums }}</span></i> |
+    <a href="{{ url_for('admin_comment') }}">管理评论</a>
+</h3><hr>
+{% for post in posts %}
+<div>
+    {% if post.disabled %}
+    <i><font color="#d2691e">这条评论已被删除。</font></i><br>
+    {% include "_posts.html" %}
+    {% endif %}
+    {% if not post.disabled %}
+    {% include "_posts.html" %}
+    {% endif %}
+</div>
+<div>
+    {% if post.disabled %}
+    <a class="btn btn-default btn-xs" href="{{ url_for('recover_post',id=post.id,
+        page=page) }}">恢复</a>
+    {% else %}
+    <a class="btn btn-danger btn-xs" href="{{ url_for('delate_post',id=post.id,
+        page=page) }}">删除</a>
+    {% endif %}
+</div><hr>
+{% endfor %}
+<div class="pagination">
+    {{ page.pages(pagination, 'admin_post') }}
+</div>
+{% endblock %}

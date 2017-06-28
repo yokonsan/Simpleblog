@@ -24,12 +24,23 @@
             </button>
         </a>
         {% endif %}
+        {% if current_user.operation(Permission.ADMINISTER) %}
+        |
+        <a href="{{ url_for('admin') }}">
+            <button type="button" class="btn btn-default btn-sm">
+              <span class="glyphicon glyphicon-cog"></span> 管理网站
+            </button>
+        </a>
+        {% endif %}
     </div>
 </div>
 <hr>
 {% if posts %}
-
-{% include "_posts.html" %}
+{% for post in posts %}
+{% if not post.disabled %}
+{% include "_posts.html" %}<hr>
+{% endif %}
+{% endfor %}
 <div class="pagination">
 {{ page.pages(pagination, 'index') }}
 </div>

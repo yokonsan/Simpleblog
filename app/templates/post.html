@@ -6,7 +6,7 @@
 {% if posts %}
 {% for post in posts %}
 <h3 align="center">{{ post.title }}</h3>
-<p align="center"><a href="{{ url_for('user', nickname=post.author.nickname) }}">{{ post.author.nickname }}</a> </p>
+<p align="center">作者：<a href="{{ url_for('user', nickname=post.author.nickname) }}">{{ post.author.nickname }}</a> </p>
 <p>
     {% if post.body_html %}
         {{ post.body_html | safe }}
@@ -161,7 +161,4 @@
     </p>
 </form>
 </div>
-{% endblock %}
-{% block scripts %}
-{{ super() }}
 {% endblock %}

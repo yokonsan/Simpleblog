@@ -46,6 +46,10 @@
 </table>
 <hr>
 {% if posts %}
-{% include "_posts.html" %}
+{% for post in posts %}
+{% if not post.disabled %}
+{% include "_posts.html" %}<hr>
+{% endif %}
+{% endfor %}
 {% endif %}
 {% endblock %}
