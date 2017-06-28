@@ -6,12 +6,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from markdown import markdown
 import bleach
 
-# import sys
-# if sys.version_info >= (3, 0):
-#     enable_search = False
-# else:
-#     enable_search = True
-#     import flask_whooshalchemy as whooshalchemy
 
 """
 generate_password_hash(password, method=pbkdf2:sha1, salt_length=8):这个函数将原始密码作为输入，
@@ -96,7 +90,7 @@ class User(UserMixin,db.Model):
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
-            if self.email == app.config['ADMINS']:
+            if self.email == app.config['ADMINMAIL']:
                 self.role = Role.query.filter_by(permissions=0xff).first()
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
@@ -202,6 +196,8 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String(64))
     body = db.Column(db.Text)
+    disabled = db.Column(db.Boolean)
+    view_num = db.Column(db.Integer, default=0)
     body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow)
 
@@ -224,8 +220,6 @@ class Post(db.Model):
     def __repr__(self):
         return '<Post %r>' % (self.body)
 db.event.listen(Post.body, 'set', Post.preview_body)
-# if enable_search:
-#     whooshalchemy.whoosh_index(app, Post)
 
 # 检验用户权限对应的类
 class AnonymousUser(AnonymousUserMixin):

@@ -19,7 +19,7 @@ MAIL_PORT = 25
 MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 # 管理员邮箱
-ADMINS = os.environ.get('ADMINS_MAIL')
+ADMINMAIL = os.environ.get('ADMIN_MAIL') or '15152347277@163.com'
 
 # 分页
 POSTS_PER_PAGE = 10

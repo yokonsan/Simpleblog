@@ -137,8 +137,10 @@ def write():
 
 @app.route('/post/<int:id>', methods=['GET','POST'])
 def post(id):
-    # 评论
     post = Post.query.get_or_404(id)
+    post.view_num += 1
+    db.session.add(post)
+    # 评论
     form = CommentForm()
     if form.validate_on_submit():
         comment = Comment(body=form.body.data, post=post,

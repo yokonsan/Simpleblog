@@ -37,4 +37,4 @@ if not app.debug:
     app.logger.setLevel(logging.INFO)
 app.logger.info('microblog startup')
 
-from app import views, models
+from app import views, models, admin
