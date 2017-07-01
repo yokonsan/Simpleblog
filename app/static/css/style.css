@@ -21,3 +21,36 @@ body{
 .taga{
     color: #dde6ef;
 }
+
+.post{
+    color: #2f2f2f;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.7;
+
+}
+
+.footer {
+	background: rgb(85, 85, 85);
+	padding: 15px 0 5px;
+	font-size: 13px;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    clear: both;
+}
+.footer-content {
+    text-align: center;
+    color: #8a6d3b;
+}
+.footer-content a {
+    text-decoration: none;
+}
+
+/*floatButton*/
+.floatButton {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    z-index: 9999999;
+}
