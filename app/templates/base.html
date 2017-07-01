@@ -14,102 +14,125 @@
       <meta charset="UTF-8">
   </head>
   <body>
-    <div class="container-fluid">
-	<div class="row">
-		<div class="col-md-12">
-			<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-				<div class="navbar-header">
+<div class="container-fluid">
+<div class="row">
+	<div class="col-md-12">
+		<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+			<div class="navbar-header">
 
-					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-						 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
-					</button> <a class="navbar-brand" href="/"><font color="#d2691e"> 简单</font></a>
-				</div>
-
-				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-					<ul class="nav navbar-nav">
-                        <li><a></a></li><li><a></a></li><li><a></a></li><li><a></a></li><li><a></a></li>
-						<li {% if title=='首页' %}class="active"{%endif%}>
-							<a href="/"><span class="glyphicon glyphicon-home"></span> 首页</a>
-						</li>
-						<li {% if title=='关注' or title=='注册' %}class="active"{% endif %}>
-                            {% if current_user.is_authenticated %}
-							<a href="{{ url_for('follows',nickname=current_user.nickname) }}">关注</a>
-                            {% else %}
-                            <a href="{{ url_for('register') }}">注册</a>
-                            {% endif %}
-						</li>
-					</ul>
-					<form class="navbar-form navbar-left" method="post" action="{{url_for('search')}}" role="search">
-						{{ g.search_form.hidden_tag() }}
-						<div class="form-group">
-							{{g.search_form.search(class="form-control")}}
-						</div>
-						<button type="submit" class="btn btn-default">
-							搜索
-						</button>
-					</form>
-					<ul class="nav navbar-nav navbar-right">
-						<li {% if title=='写文章' %}class="active"{%endif%}>
-                            <a href="{% if current_user.is_authenticated %}{{ url_for('write') }}{% else %}{{ url_for('login') }}{% endif %}">
-                              <span class="glyphicon glyphicon-pencil"></span> 写文章
-                            </a>
-						</li>
-                        {% if current_user.is_authenticated %}
-						<li class="dropdown">
-							 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><img src="{{ current_user.gravatar(size=20) }}"> <strong class="caret"></strong></a>
-							<ul class="dropdown-menu">
-								<li>
-									<a href="{{ url_for('user', nickname=current_user.nickname) }}"><span class="glyphicon glyphicon-user"></span> 个人主页</a>
-								</li>
-								<li>
-									<a href="{{ url_for('change_password') }}"><span class="glyphicon glyphicon-refresh"></span> 更改密码</a>
-								</li>
-								<li class="divider">
-								</li>
-								<li>
-									<a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span> 登出</a>
-								</li>
-							</ul>
-						</li>
-                        {% else %}
-                        <li {% if title=='登录' %}class="active"{%endif%}>
-                            <a href="{{ url_for('login') }}"><span class="glyphicon glyphicon-log-in"></span> 登录</a>
-                        </li>
-                        {% endif %}
-                        <li><a></a></li><li><a></a></li><li><a></a></li><li><a></a></li>
-					</ul>
-				</div>
-			</nav>
-		</div>
-	</div>
-	<br><br>
-	<div class="row clearfix">
-		<div class="col-md-2 column">
-		</div>
-		<div class="col-md-8 column">
-            <br>
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            {% for message in messages %}
-			<div id="myAlert" class="alert alert-success">
-				<a href="#" class="close" data-dismiss="alert">&times;</a>
-				<strong>{{ message }}</strong>
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+					 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+				</button> <a class="navbar-brand" href="/"><font color="#d2691e"> 简单</font></a>
 			</div>
-            {% endfor %}
-            {% endif %}
-            {% endwith %}
-            <div class="main">
-                {% block content %}
-                {% endblock %}
-            </div>
+
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				<ul class="nav navbar-nav">
+					<li><a></a></li><li><a></a></li><li><a></a></li><li><a></a></li><li><a></a></li>
+					<li {% if title=='首页' %}class="active"{%endif%}>
+						<a href="/"><span class="glyphicon glyphicon-home"></span> 首页</a>
+					</li>
+					<li {% if title=='关注' or title=='注册' %}class="active"{% endif %}>
+						{% if current_user.is_authenticated %}
+						<a href="{{ url_for('follows',nickname=current_user.nickname) }}">关注</a>
+						{% else %}
+						<a href="{{ url_for('register') }}">注册</a>
+						{% endif %}
+					</li>
+				</ul>
+				<form class="navbar-form navbar-left" method="post" action="{{url_for('search')}}" role="search">
+					{{ g.search_form.hidden_tag() }}
+					<div class="form-group">
+						{{g.search_form.search(class="form-control")}}
+					</div>
+					<button type="submit" class="btn btn-default">
+						搜索
+					</button>
+				</form>
+				<ul class="nav navbar-nav navbar-right">
+					<li {% if title=='写文章' %}class="active"{%endif%}>
+						<a href="{% if current_user.is_authenticated %}{{ url_for('write') }}{% else %}{{ url_for('login') }}{% endif %}">
+						  <span class="glyphicon glyphicon-pencil"></span> 写文章
+						</a>
+					</li>
+					{% if current_user.is_authenticated %}
+					<li class="dropdown">
+						 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><img src="{{ current_user.gravatar(size=20) }}"> <strong class="caret"></strong></a>
+						<ul class="dropdown-menu">
+							<li>
+								<a href="{{ url_for('user', nickname=current_user.nickname) }}"><span class="glyphicon glyphicon-user"></span> 个人主页</a>
+							</li>
+							<li>
+								<a href="{{ url_for('change_password') }}"><span class="glyphicon glyphicon-refresh"></span> 更改密码</a>
+							</li>
+							<li class="divider">
+							</li>
+							<li>
+								<a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span> 登出</a>
+							</li>
+						</ul>
+					</li>
+					{% else %}
+					<li {% if title=='登录' %}class="active"{%endif%}>
+						<a href="{{ url_for('login') }}"><span class="glyphicon glyphicon-log-in"></span> 登录</a>
+					</li>
+					{% endif %}
+					<li><a></a></li><li><a></a></li><li><a></a></li><li><a></a></li>
+				</ul>
+			</div>
+		</nav>
+	</div>
+</div>
+
+	<br><br>
+<div class="row clearfix">
+	<div class="col-md-2 column">
+	</div>
+	<div class="col-md-8 column">
+		<br>
+		{% with messages = get_flashed_messages() %}
+		{% if messages %}
+		{% for message in messages %}
+		<div id="myAlert" class="alert alert-success">
+			<a href="#" class="close" data-dismiss="alert">&times;</a>
+			<strong>{{ message }}</strong>
 		</div>
-		<div class="col-md-2 column">
+		{% endfor %}
+		{% endif %}
+		{% endwith %}
+		<div class="main">
+			{% block content %}
+			{% endblock %}
+			<br><br><br><br><br><br><br><br><br><br>
 		</div>
 	</div>
-    </div>
+	<div class="col-md-2 column">
+	</div>
+</div>
+</div>
+<div class="footer">
+<p class="footer-content">
+	@2017 |
+	<a href="https://github.com/Blackyukun/Simpleblog">源码</a> |
+	简单 |
+	<a href="http://www.yukunweb.com/">友情链接</a>
+</p>
+</div>
+
+<div class="btn-group-vertical floatButton">
+	<button id="goTop" class="btn btn-default" title="去顶部" type="button">
+		<span class="glyphicon glyphicon-arrow-up"></span>
+	</button>
+	<button id="refresh" class="btn btn-default" title="刷新" type="button">
+		<span class="glyphicon glyphicon-refresh"></span>
+	</button>
+	<button id="goBottom" class="btn btn-default" title="去底部" type="button">
+		<span class="glyphicon glyphicon-arrow-down"></span>
+	</button>
+</div>
 
     {% block scripts %}
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/floatButton.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     {{ moment.include_moment() }}
 	{{ moment.lang("zh-CN") }}

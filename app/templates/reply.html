@@ -1,7 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h4>回复{{ nickname }}</h4>
+<h4>回复{{ comment.author.nickname }}</h4>
+<hr>
+<div>
+    <img src="{{comment.author.gravatar(size=30)}}">
+    <a href="{{url_for('user', nickname=comment.author.nickname)}}">
+        {{ comment.author.nickname }}
+    </a>:
+</div>
+<div class="comments">
+    <p>
+    {% if comment.body_html %}
+        {{ comment.body_html | safe }}
+    {% else %}
+        {{ comment.body }}
+    {% endif %}
+    </p>
+</div>
+<hr>
 <form action="" method="post" name="reply">
 {{form.hidden_tag()}}
 {{form.body(class="form-control",rows="3")}}<br>

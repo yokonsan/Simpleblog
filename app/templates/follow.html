@@ -20,17 +20,19 @@
                 <span class="right">{{ moment(follow.timestamp).fromNow() }}</span>
                 {% if current_user.operation(Permission.FOLLOW) and user != current_user %}
                     {% if not current_user.is_following(user) %}
-                    <a class="right" href="{{ url_for('follow', nickname=user.nickname) }}">取消关注</a>
+                    <a class="right" href="{{ url_for('follow', nickname=user.nickname) }}">关注</a>
                     {% else %}
-                    <a class="right" href="{{ url_for('unfollow', nickname=user.nickname) }}">关注</a>
+                    <a class="right" href="{{ url_for('unfollow', nickname=user.nickname) }}">取消关注</a>
                     {% endif %}
                 {% endif %}
             </li>
         </ul>
         {% endfor %}
+        <hr>
         <div class="pagination">
             {{ page.pages(pagination, 'follows', nickname=user.nickname) }}
         </div>
+        <hr>
     </div>
     <div class="col-md-4 column">
         <div class="panel panel-success">
@@ -47,5 +49,4 @@
         </div>
     </div>
 </div>
-
 {% endblock %}

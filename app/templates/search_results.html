@@ -2,5 +2,7 @@
 
 {% block content %}
 <h3>"{{query}}"的搜索结果：</h3><hr>
+{% for post in posts %}
 {% include '_posts.html' %}
+{% endfor %}
 {% endblock %}

@@ -128,13 +128,20 @@ def write():
         post = Post(body=form.body.data,
                     title=form.title.data,
                     author = current_user._get_current_object())
-
         db.session.add(post)
         flash('发布成功！')
         return redirect(url_for('write'))
     return render_template('write.html', form=form,post=form.body.data,
                            title='写文章')
 
+# 保存草稿
+@app.route('/draft')
+@login_required
+def draft():
+
+    pass
+
+# 文章详情
 @app.route('/post/<int:id>', methods=['GET','POST'])
 def post(id):
     post = Post.query.get_or_404(id)
@@ -178,7 +185,7 @@ def reply(id):
         db.session.add(reply_comment)
         flash('你的回复已经发表。')
         return redirect(url_for('post', id=comment.post_id, page=page))
-    return render_template('reply.html', form=form, nickname=comment.author.nickname, title='回复')
+    return render_template('reply.html', form=form, comment=comment, title='回复')
 
 
 # 管理评论

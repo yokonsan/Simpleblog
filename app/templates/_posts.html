@@ -8,7 +8,7 @@
 <td>
 <a href="{{url_for('user',nickname=post.author.nickname)}}">
     {{post.author.nickname}}
-</a>
+</a><span>{{ moment(post.timestamp).fromNow() }}发布</span>
     <i class="right">浏览：<span class="badge">{{ post.view_num }}</span></i>
     <i class="right">评论：<span class="badge">{{ post.comments.count() }}</span></i>
 </td>
