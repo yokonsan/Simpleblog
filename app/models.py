@@ -52,6 +52,9 @@ is_following()方法和is_followed_by()方法分别在左右两边的一对多�
 >>> Role.query.all()
 
 Comment模型和Post模型的属性一样，但是多了个disabled字段。这是个布尔值字段，作者可以通过这个字段查禁不当评论。
+Post模型也添加disabled字段。
+
+会话模型中，lazy='joined'指明加载记录，使用联结，primaryjoin明确指定两个模型之间使用的联结条件。
 """
 
 # 关注关联表
@@ -199,6 +202,7 @@ class Post(db.Model):
     disabled = db.Column(db.Boolean)
     view_num = db.Column(db.Integer, default=0)
     body_html = db.Column(db.Text)
+    draft = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow)
 
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -256,3 +260,47 @@ class Comment(db.Model):
             tags=allowed_tags, strip=True
         ))
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
+
+# 会话
+class Conversation(db.Model):
+    __tablename__ = 'conversations'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    from_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    body = db.Column(db.String(255), nullable=True)
+    draft = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
+
+    trash = db.Column(db.Boolean, default=False)
+    unread = db.Column(db.Boolean, default=False)
+
+    messages = db.relationship('Message', lazy='joined', backref='conversation',
+                               primaryjoin='Message.conversation_id == Conversation.id',
+                               order_by = 'asc(Message.id)', cascade='all, delete-orphan')
+    user = db.relationship('User', lazy='joined', foreign_keys=[user_id])
+    to_user = db.relationship('User', lazy='joined', foreign_keys=[to_user_id])
+    from_user = db.relationship('User', lazy='joined', foreign_keys=[from_user_id])
+
+    @property
+    def first_message(self):
+        return self.messages[0]
+    @property
+    def last_message(self):
+        return self.messages[-1]
+
+
+# 消息
+class Message(db.Model):
+    __tablename__ = 'messages'
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_id = db.Column(db.Integer, db.ForeignKey('conversations.id'))
+    # 发起消息的人
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    message = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
+
+    user = db.relationship('User', lazy='joined')
+
+
+
