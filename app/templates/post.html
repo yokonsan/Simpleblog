@@ -15,6 +15,16 @@
     {% endif %}
 </div>
     <i class="right">{{ moment(post.timestamp).fromNow() }} 发布</i>
+    <br>
+    {% if post.like_num.filter_by(liker_id=current_user.id).first() == None %}
+        <a href="{{ url_for('like',id=post.id) }}" class="btn btn-info btn-lg">
+          <span class="glyphicon glyphicon-thumbs-up"></span> 点赞|{{ post.like_num.count() }}
+        </a>
+    {% else %}
+        <a href="{{ url_for('unlike',id=post.id) }}" class="btn btn-info btn-lg">
+          <span class="glyphicon glyphicon-thumbs-down"></span> 取消赞|{{ post.like_num.count() }}
+        </a>
+    {% endif %}
 {% endfor %}
 {% endif %}
 <hr>

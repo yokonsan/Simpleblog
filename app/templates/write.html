@@ -16,9 +16,11 @@
         {% for error in form.body.errors %}
             <span style="color: red;">[{{error}}]</span>
         {% endfor %}<br>
+        {{ form.submit(class="btn btn-default") }}<br><br>
+        {{ form.save_draft(class="btn btn-default") }}
     </p>
-    <p><input type="submit" class="btn btn-default" value="发布"></p>
-    <p><input type="submit" class="btn btn-default" value="保存草稿"></p>
+    <!--<p><input type="submit" class="btn btn-default" value="发布"></p>-->
+    <!--<p><input type="submit" class="btn btn-default" value="保存草稿"></p>-->
 </form>
 {% if post.body_html %}
     {{ post.body_html | safe }}
