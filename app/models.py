@@ -55,6 +55,9 @@ Comment模型和Post模型的属性一样，但是多了个disabled字段。这�
 Post模型也添加disabled字段。
 
 会话模型中，lazy='joined'指明加载记录，使用联结，primaryjoin明确指定两个模型之间使用的联结条件。
+为了消除外键之间的歧义，定义关系时必须使用可选参数 foreign_keys 指定的外键。
+cascade 参数的值是一组有逗号分隔的层叠选项，all 表示除了 delete-orphan 之外的所有层叠选项。
+all,delete-orphan 的意思是启用所有默认层叠选项，而且还要删除孤儿记录。
 """
 
 # 关注关联表
@@ -63,6 +66,13 @@ class Follow(db.Model):
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     followed_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+# 点赞关联表
+# class Like(db.Model):
+#     __tablename__ = 'likes'
+#     liker_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+#     liked_id = db.Column(db.Integer, db.ForeignKey('posts.id'), primary_key=True)
+#     timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 class User(UserMixin,db.Model):
     __tablename__ = 'users'
@@ -73,6 +83,8 @@ class User(UserMixin,db.Model):
     # 关联
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    # post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    likes = db.relationship('Like', backref='user', lazy='dynamic')
     comments = db.relationship('Comment', backref='author', lazy='dynamic')
     # reply_comments = db.relationship('Reply', backref='author', lazy='dynamic')
     # 个人资料
@@ -203,9 +215,11 @@ class Post(db.Model):
     view_num = db.Column(db.Integer, default=0)
     body_html = db.Column(db.Text)
     draft = db.Column(db.Boolean, default=False)
+    # like_num = db.Column(db.Integer, default=0)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow)
 
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    like_num = db.relationship('Like', backref='post', lazy='dynamic')
     comments = db.relationship('Comment', backref='post', lazy='dynamic')
     # reply_comments = db.relationship('Reply', backref='post', lazy='dynamic')
 
@@ -235,6 +249,14 @@ class AnonymousUser(AnonymousUserMixin):
 
 lm.anonymous_user = AnonymousUser
 
+# 点赞
+class Like(db.Model):
+    __tablename__ = 'likes'
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
+
+    liker_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
 class Comment(db.Model):
     __tablename__ = 'comments'

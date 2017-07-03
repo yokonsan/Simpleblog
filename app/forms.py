@@ -25,7 +25,7 @@ class RegisterForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Length(1, 64),
                                            Email()])
     nickname = StringField('Nickname', validators=[
-        DataRequired(), Length(1, 64), Regexp('^[\u4e00-\u9fa5]|[A-Z][a-z][0-9_.]*', 0,
+        DataRequired(), Length(1, 64), Regexp('^[\u4e00-\u9fa5]|[a-z]|[A-Z][0-9_.]*', 0,
                                           '昵称必须以汉字或字母开头')])
     password = PasswordField('Password', validators=[
         DataRequired(), EqualTo('password2', message='密码必须确认一致。')])
@@ -55,6 +55,15 @@ class ProfileForm(FlaskForm):
 class PostForm(FlaskForm):
     body = PageDownField('写文章或者提问?', validators=[DataRequired()])
     title = StringField('标题', validators=[Length(1, 20)])
+    save_draft = SubmitField('保存草稿')
+    submit = SubmitField('发布')
+
+class EditpostForm(FlaskForm):
+    title = StringField('标题', validators=[Length(1, 20)])
+    body = PageDownField('编辑文章', validators=[DataRequired()])
+    update = SubmitField('更新')
+    submit = SubmitField('发布')
+    save_draft = SubmitField('保存')
 
 # 评论表单
 class CommentForm(FlaskForm):
@@ -67,3 +76,4 @@ class ReplyForm(FlaskForm):
 # 搜索表单
 class SearchForm(FlaskForm):
     search = StringField('搜索', validators=[DataRequired()])
+

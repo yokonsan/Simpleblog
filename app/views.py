@@ -2,8 +2,8 @@ from app import app, lm
 from flask import render_template, flash, redirect, session, url_for, request, abort, make_response, g
 from flask_login import login_user, logout_user, current_user, login_required
 from .forms import LoginForm, RegisterForm, ChangePasswordForm, \
-        ProfileForm, PostForm, CommentForm, ReplyForm, SearchForm
-from .models import User, Permission, Role, Post, Comment
+        ProfileForm, PostForm, CommentForm, ReplyForm, SearchForm, EditpostForm
+from .models import User, Permission, Role, Post, Comment, Like
 from . import db
 from datetime import datetime
 from .decorators import admin_required, permission_required
@@ -26,7 +26,8 @@ def index():
         page, per_page=app.config['POSTS_PER_PAGE'],
         error_out=False
     )
-    posts = pagination.items
+    # posts = pagination.items
+    posts = [post for post in pagination.items if post.draft==False]
     return render_template('index.html',title = '首页',posts=posts,
                            pagination=pagination, Permission=Permission)
 
@@ -120,26 +121,42 @@ def editprofile():
     return render_template('editprofile.html', form=form, title='编辑资料')
 
 # 博客文章
-@app.route('/write', methods=['GET', 'POST'])
+@app.route('/write', methods=['GET','POST'])
 def write():
     form = PostForm()
     if current_user.operation(Permission.WRITE_ARTICLES) and \
             form.validate_on_submit():
-        post = Post(body=form.body.data,
-                    title=form.title.data,
-                    author = current_user._get_current_object())
-        db.session.add(post)
-        flash('发布成功！')
+        if 'save_draft' in request.form and form.validate():
+            post = Post(body=form.body.data,
+                        title=form.title.data,
+                        draft= True,
+                        author = current_user._get_current_object())
+            db.session.add(post)
+            flash('保存成功！')
+        elif 'submit' in request.form and form.validate():
+            post = Post(body=form.body.data,
+                        title=form.title.data,
+                        author=current_user._get_current_object())
+            db.session.add(post)
+            flash('发布成功！')
         return redirect(url_for('write'))
-    return render_template('write.html', form=form,post=form.body.data,
+    return render_template('write.html', form=form, post=form.body.data,
                            title='写文章')
 
-# 保存草稿
-@app.route('/draft')
+# 草稿
+@app.route('/draft/')
 @login_required
 def draft():
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=app.config['POSTS_PER_PAGE'],
+        error_out=False
+    )
+    posts = pagination.items
+    drafts = [post for post in posts if post.draft==True]
 
-    pass
+    return render_template('draft.html', title='草稿',
+                           pagination=pagination, drafts=drafts)
 
 # 文章详情
 @app.route('/post/<int:id>', methods=['GET','POST'])
@@ -168,6 +185,37 @@ def post(id):
                            title=post.title,id=post.id,post=post,
                            form=form, comments=comments,
                            pagination=pagination)
+
+# 点赞
+@app.route('/like/<int:id>')
+@login_required
+def like(id):
+    post = Post.query.get_or_404(id)
+
+    if post.like_num.filter_by(liker_id=current_user.id).first() is not None:
+        flash('你已经点赞。')
+        return redirect(url_for('post', id=post.id))
+    like = Like(post=post,
+                user=current_user._get_current_object())
+    db.session.add(like)
+    flash('点赞成功！')
+    return redirect(url_for('post', id=post.id))
+
+# 取消赞
+@app.route('/unlike/<int:id>')
+@login_required
+def unlike(id):
+    post = Post.query.get_or_404(id)
+    if post.like_num.filter_by(liker_id=current_user.id).first() is None:
+        flash('你还未点赞。')
+        return redirect(url_for('post', id=post.id))
+    # like = Like(post=post,
+    #             user=current_user._get_current_object())
+    else:
+        f = post.like_num.filter_by(liker_id=current_user.id).first()
+        db.session.delete(f)
+        flash('已取消点赞。')
+        return redirect(url_for('post', id=post.id))
 
 # 交互回复评论
 @app.route('/reply/<int:id>', methods=['GET','POST'])
@@ -216,15 +264,26 @@ def edit(id):
     if current_user != post.author and \
         not current_user.operation(Permission.ADMINISTER):
         abort(403)
-    form = PostForm()
+    form = EditpostForm()
     if form.validate_on_submit():
         post.body = form.body.data
-        db.session.add(post)
-        flash('更新成功。')
-        return redirect(url_for('post', id=post.id))
+        if post.draft == True:
+            if 'save_draft' in request.form and form.validate():
+                db.session.add(post)
+                flash('保存成功！')
+            elif 'submit' in request.form and form.validate():
+                post.draft = False
+                db.session.add(post)
+                flash('发布成功')
+            return redirect(url_for('edit', id=post.id))
+        else:
+            db.session.add(post)
+            flash('更新成功。')
+            return redirect(url_for('post', id=post.id))
     form.title.data = post.title
     form.body.data = post.body
-    return render_template('editpost.html', form=form, title='编辑文章')
+    return render_template('editpost.html', form=form,
+                           post=post, title='编辑文章')
 
 # 关注路由
 @app.route('/follow/<nickname>')
@@ -318,4 +377,5 @@ def search_results(query):
     results = Post.query.whooshee_search(query).all()
     return render_template('search_results.html',query=query,
                            title='搜索结果',posts=results)
+
 
