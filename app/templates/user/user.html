@@ -9,7 +9,7 @@
             {% if user.about_me %}<p>{{user.about_me}}</p>{% endif %}
             {% if user.last_seen %}<p><i>最后离开时间：{{user.last_seen}}</i></p>{% endif %}
             {% if user == current_user %}
-            <p><a href="{{url_for('editprofile')}}">
+            <p><a href="{{url_for('user.edit_profile')}}">
                 <button type="button" class="btn btn-default btn-sm">
                   <span class="glyphicon glyphicon-cog"></span> 修改资料
                 </button>
@@ -18,23 +18,23 @@
             <!--关注者-->
             {% if current_user.operation(Permission.FOLLOW) and user != current_user %}
                 {% if not current_user.is_following(user) %}
-                <a href="{{ url_for('follow', nickname=user.nickname) }}">
+                <a href="{{ url_for('user.follow', nickname=user.nickname) }}">
                     <button type="button" class="btn btn-default btn-sm">
                       <span class="glyphicon glyphicon-star"></span> 关注
                     </button>
                 </a>
                 {% else %}
-                <a href="{{ url_for('unfollow', nickname=user.nickname) }}">
+                <a href="{{ url_for('user.unfollow', nickname=user.nickname) }}">
                     <button type="button" class="btn btn-default btn-sm">
                       <span class="glyphicon glyphicon-star-empty"></span> 取消关注
                     </button>
                 </a>
                 {% endif %}
             {% endif %}
-            <a href="{{ url_for('follows', nickname=user.nickname) }}">
+            <a href="{{ url_for('user.follows', nickname=user.nickname) }}">
                 粉丝：
             </a><span>{{ user.followers.count() }}</span>
-            <a href="{{ url_for('follows', nickname=user.nickname) }}">
+            <a href="{{ url_for('user.follows', nickname=user.nickname) }}">
                 关注：
             </a><span>{{ user.followed.count() }}</span>
             {% if current_user.is_authenticated and user != current_user and
@@ -44,6 +44,8 @@
         </td>
     </tr>
 </table>
+<br>
+<h3>发布的全部文章</h3>
 <hr>
 {% if posts %}
 {% for post in posts %}

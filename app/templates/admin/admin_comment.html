@@ -3,7 +3,7 @@
 
 {% block content %}
 <h3>
-    <a href="{{ url_for('admin_post') }}">管理文章</a> |
+    <a href="{{ url_for('admin.admin_post') }}">管理文章</a> |
     <i>管理评论 <span class="badge">{{ nums }}</span></i>
 </h3><hr>
 {% for comment in comments %}
@@ -12,7 +12,7 @@
     <i><font color="#d2691e">这条评论已被删除。</font></i><br>
     <div>
         <img src="{{comment.author.gravatar(size=30)}}">
-        <a href="{{url_for('user', nickname=comment.author.nickname)}}">
+        <a href="{{url_for('user.users', nickname=comment.author.nickname)}}">
             {{ comment.author.nickname }}
         </a>:
         <span class="right">{{ moment(comment.timestamp).fromNow() }}发布</span>
@@ -28,7 +28,7 @@
     {% if not comment.disabled %}
     <div>
         <img src="{{comment.author.gravatar(size=30)}}">
-        <a href="{{url_for('user', nickname=comment.author.nickname)}}">
+        <a href="{{url_for('user.users', nickname=comment.author.nickname)}}">
             {{ comment.author.nickname }}
         </a>:
         <span class="right">{{ moment(comment.timestamp).fromNow() }}发布</span>
@@ -44,16 +44,16 @@
 </div>
 <div>
     {% if comment.disabled %}
-    <a class="btn btn-default btn-xs" href="{{ url_for('admin_recover',id=comment.id,
+    <a class="btn btn-default btn-xs" href="{{ url_for('admin.admin_recover',id=comment.id,
         page=page) }}">恢复</a>
     {% else %}
-    <a class="btn btn-danger btn-xs" href="{{ url_for('admin_delate',id=comment.id,
+    <a class="btn btn-danger btn-xs" href="{{ url_for('admin.admin_delate',id=comment.id,
         page=page) }}">删除</a>
     {% endif %}
 </div>
 <hr>
 {% endfor %}
 <div class="pagination">
-    {{ page.pages(pagination, 'admin_comment') }}
+    {{ page.pages(pagination, 'admin.admin_comment') }}
 </div>
 {% endblock %}

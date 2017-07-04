@@ -22,24 +22,24 @@
 
 				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
 					 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
-				</button> <a class="navbar-brand" href="/"><font color="#d2691e"> 简单</font></a>
+				</button> <a class="navbar-brand" href="{{ url_for('user.index') }}"><font color="#d2691e"> 简单</font></a>
 			</div>
 
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
 					<li><a></a></li><li><a></a></li><li><a></a></li><li><a></a></li><li><a></a></li>
 					<li {% if title=='首页' %}class="active"{%endif%}>
-						<a href="/"><span class="glyphicon glyphicon-home"></span> 首页</a>
+						<a href="{{ url_for('user.index') }}"><span class="glyphicon glyphicon-home"></span> 首页</a>
 					</li>
 					<li {% if title=='关注' or title=='注册' %}class="active"{% endif %}>
 						{% if current_user.is_authenticated %}
-						<a href="{{ url_for('follows',nickname=current_user.nickname) }}">关注</a>
+						<a href="{{ url_for('user.follows',nickname=current_user.nickname) }}">关注</a>
 						{% else %}
-						<a href="{{ url_for('register') }}">注册</a>
+						<a href="{{ url_for('auth.register') }}">注册</a>
 						{% endif %}
 					</li>
 				</ul>
-				<form class="navbar-form navbar-left" method="post" action="{{url_for('search')}}" role="search">
+				<form class="navbar-form navbar-left" method="post" action="{{url_for('user.search')}}" role="search">
 					{{ g.search_form.hidden_tag() }}
 					<div class="form-group">
 						{{g.search_form.search(class="form-control")}}
@@ -50,7 +50,7 @@
 				</form>
 				<ul class="nav navbar-nav navbar-right">
 					<li {% if title=='写文章' %}class="active"{%endif%}>
-						<a href="{% if current_user.is_authenticated %}{{ url_for('write') }}{% else %}{{ url_for('login') }}{% endif %}">
+						<a href="{% if current_user.is_authenticated %}{{ url_for('user.write') }}{% else %}{{ url_for('auth.login') }}{% endif %}">
 						  <span class="glyphicon glyphicon-pencil"></span> 写文章
 						</a>
 					</li>
@@ -59,21 +59,21 @@
 						 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><img src="{{ current_user.gravatar(size=20) }}"> <strong class="caret"></strong></a>
 						<ul class="dropdown-menu">
 							<li>
-								<a href="{{ url_for('user', nickname=current_user.nickname) }}"><span class="glyphicon glyphicon-user"></span> 个人主页</a>
+								<a href="{{ url_for('user.users', nickname=current_user.nickname) }}"><span class="glyphicon glyphicon-user"></span> 个人主页</a>
 							</li>
 							<li>
-								<a href="{{ url_for('change_password') }}"><span class="glyphicon glyphicon-refresh"></span> 更改密码</a>
+								<a href="{{ url_for('auth.change_password') }}"><span class="glyphicon glyphicon-refresh"></span> 更改密码</a>
 							</li>
 							<li class="divider">
 							</li>
 							<li>
-								<a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span> 登出</a>
+								<a href="{{ url_for('auth.logout') }}"><span class="glyphicon glyphicon-log-out"></span> 登出</a>
 							</li>
 						</ul>
 					</li>
 					{% else %}
 					<li {% if title=='登录' %}class="active"{%endif%}>
-						<a href="{{ url_for('login') }}"><span class="glyphicon glyphicon-log-in"></span> 登录</a>
+						<a href="{{ url_for('auth.login') }}"><span class="glyphicon glyphicon-log-in"></span> 登录</a>
 					</li>
 					{% endif %}
 					<li><a></a></li><li><a></a></li><li><a></a></li><li><a></a></li>

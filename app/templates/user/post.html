@@ -6,7 +6,7 @@
 {% if posts %}
 {% for post in posts %}
 <h3 align="center">{{ post.title }}</h3>
-<p align="center">作者：<a href="{{ url_for('user', nickname=post.author.nickname) }}">{{ post.author.nickname }}</a> </p>
+<p align="center">作者：<a href="{{ url_for('user.users', nickname=post.author.nickname) }}">{{ post.author.nickname }}</a> </p>
 <div class="post">
     {% if post.body_html %}
         {{ post.body_html | safe }}
@@ -17,11 +17,11 @@
     <i class="right">{{ moment(post.timestamp).fromNow() }} 发布</i>
     <br>
     {% if post.like_num.filter_by(liker_id=current_user.id).first() == None %}
-        <a href="{{ url_for('like',id=post.id) }}" class="btn btn-info btn-lg">
+        <a href="{{ url_for('user.like',id=post.id) }}" class="btn btn-info btn-lg">
           <span class="glyphicon glyphicon-thumbs-up"></span> 点赞|{{ post.like_num.count() }}
         </a>
     {% else %}
-        <a href="{{ url_for('unlike',id=post.id) }}" class="btn btn-info btn-lg">
+        <a href="{{ url_for('user.unlike',id=post.id) }}" class="btn btn-info btn-lg">
           <span class="glyphicon glyphicon-thumbs-down"></span> 取消赞|{{ post.like_num.count() }}
         </a>
     {% endif %}
@@ -38,16 +38,16 @@
         <li class="list-group-item">
             <div>
                 <img src="{{comment.author.gravatar(size=30)}}">
-                <a href="{{url_for('user', nickname=comment.author.nickname)}}">
+                <a href="{{url_for('user.users', nickname=comment.author.nickname)}}">
                     {{ comment.author.nickname }}
                 </a>:
                 {% if current_user.nickname == post.author.nickname %}
                     <h4><span class="right label label-danger">
-                        <a class="taga" href="{{ url_for('delate',id=comment.id) }}">删除</a>
+                        <a class="taga" href="{{ url_for('user.delate',id=comment.id) }}">删除</a>
                     </span></h4>
                 {% endif %}
                 <span class="right">{{ moment(comment.timestamp).fromNow() }}发布</span>
-                <span class="right"><a href="{{ url_for('reply',id=comment.id) }}">回复</a> </span>
+                <span class="right"><a href="{{ url_for('user.reply',id=comment.id) }}">回复</a> </span>
             </div>
             <div class="comments">
                 <p>
@@ -71,16 +71,16 @@
             </div>
             <div>
                 <img src="{{comment.author.gravatar(size=30)}}">
-                <a href="{{url_for('user', nickname=comment.author.nickname)}}">
+                <a href="{{url_for('user.users', nickname=comment.author.nickname)}}">
                     {{ comment.author.nickname }}
                 </a>:
                 {% if current_user.nickname == post.author.nickname %}
                     <h4><span class="right label label-danger">
-                        <a class="taga" href="{{ url_for('delate',id=comment.id) }}">删除</a>
+                        <a class="taga" href="{{ url_for('user.delate',id=comment.id) }}">删除</a>
                     </span></h4>
                 {% endif %}
                 <span class="right">{{ moment(comment.timestamp).fromNow() }}发布</span>
-                <span class="right"><a href="{{ url_for('reply',id=comment.id) }}">回复</a> </span>
+                <span class="right"><a href="{{ url_for('user.reply',id=comment.id) }}">回复</a> </span>
             </div>
             <div class="comments">
                 <p>
@@ -102,11 +102,11 @@
 
                 <div>
                     <img src="{{comment.author.gravatar(size=30)}}">
-                    <a href="{{url_for('user', nickname=comment.author.nickname)}}">
+                    <a href="{{url_for('user.users', nickname=comment.author.nickname)}}">
                         {{ comment.author.nickname }}
                     </a>:
                         <h4><span class="right label label-default">
-                            <a class="tags" href="{{ url_for('recover',id=comment.id) }}">恢复</a>
+                            <a class="tags" href="{{ url_for('user.recover',id=comment.id) }}">恢复</a>
                         </span></h4>
                     <span class="right">{{ moment(comment.timestamp).fromNow() }}发布</span>
                 </div>
@@ -125,11 +125,11 @@
             <li class="list-group-item">
                 <div>
                     <img src="{{comment.author.gravatar(size=30)}}">
-                    <a href="{{url_for('user', nickname=comment.author.nickname)}}">
+                    <a href="{{url_for('user.users', nickname=comment.author.nickname)}}">
                         {{ comment.author.nickname }}
                     </a>:
                         <h4><span class="right label label-danger">
-                            <a class="taga" href="{{ url_for('recover',id=comment.id) }}">恢复</a>
+                            <a class="taga" href="{{ url_for('user.recover',id=comment.id) }}">恢复</a>
                         </span></h4>
                     <span class="right">{{ moment(comment.timestamp).fromNow() }}发布</span>
                 </div>
@@ -151,7 +151,7 @@
 </div>
 
 <div class="pagination">
-    {{ page.pages(pagination, 'post', fragment='#comments', id=posts[0].id) }}
+    {{ page.pages(pagination, 'user.post', fragment='#comments', id=posts[0].id) }}
 </div>
 <hr>
 <form action="" method="post" name="comment">
@@ -165,7 +165,7 @@
         {% if current_user.is_authenticated %}
         <input type="submit" value="发表">
         {% else %}
-        <a href="{{ url_for('login') }}">
+        <a href="{{ url_for('auth.login') }}">
             <h4>还没有登录哦，前往登录</h4>
         </a>
         {% endif %}

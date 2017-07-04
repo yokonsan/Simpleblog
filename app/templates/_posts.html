@@ -1,12 +1,12 @@
 <table>
 <tr>
 <td>
-<a href="{{url_for('user', nickname=post.author.nickname)}}">
+<a href="{{url_for('user.users', nickname=post.author.nickname)}}">
     <img class="images" src="{{post.author.gravatar(size=40)}}">
 </a>
 </td>
 <td>
-<a href="{{url_for('user',nickname=post.author.nickname)}}">
+<a href="{{url_for('user.users',nickname=post.author.nickname)}}">
     {{post.author.nickname}}
 </a><i>{{ moment(post.timestamp).fromNow() }}发布</i>
     <i class="right">浏览：<span class="badge">{{ post.view_num }}</span></i>
@@ -18,7 +18,7 @@
 <td></td>
 <td>
 <h5>
-    <a href="{{url_for('post', id=post.id)}}"><h4>{{post.title}}</h4></a>
+    <a href="{{url_for('user.post', id=post.id)}}"><h4>{{post.title}}</h4></a>
 </h5>
 <p>
     {% if post.body_html %}
@@ -29,11 +29,11 @@
 </p>
 <p>
     {% if current_user == post.author %}
-    <a class="btn" href="{{ url_for('edit', id=post.id) }}">
+    <a class="btn" href="{{ url_for('user.edit', id=post.id) }}">
         <span>编辑 >></span>
     </a>
     {% elif current_user.is_administrator() %}
-    <a class="btn" href="{{ url_for('edit', id=post.id) }}">
+    <a class="btn" href="{{ url_for('user.edit', id=post.id) }}">
         <span>编辑【管理员】</span>
     </a>
     {% endif %}

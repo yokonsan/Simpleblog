@@ -1,102 +1,15 @@
-from app import app, lm
-from flask import render_template, flash, redirect, session, url_for, request, abort, make_response, g
-from flask_login import login_user, logout_user, current_user, login_required
-from .forms import LoginForm, RegisterForm, ChangePasswordForm, \
-        ProfileForm, PostForm, CommentForm, ReplyForm, SearchForm, EditpostForm
-from .models import User, Permission, Role, Post, Comment, Like
-from . import db
+from .. import db
+from . import user
+from flask import render_template, flash, redirect, url_for, request, abort, make_response, g, current_app
+from flask_login import current_user, login_required
+from .forms import ProfileForm, PostForm, CommentForm, ReplyForm, SearchForm, EditpostForm
+from ..models import User, Post, Comment, Like, Permission
 from datetime import datetime
-from .decorators import admin_required, permission_required
+from ..decorators import permission_required
 
-
-@app.errorhandler(404)
-def internal_error(error):
-    return render_template('404.html', title='404'), 404
-
-@app.errorhandler(500)
-def internal_error(error):
-    db.session.rollback()
-    return render_template('500.html', title='500'), 500
-
-@app.route('/')
-@app.route('/index')
-def index():
-    page = request.args.get('page', 1, type=int)
-    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
-        page, per_page=app.config['POSTS_PER_PAGE'],
-        error_out=False
-    )
-    # posts = pagination.items
-    posts = [post for post in pagination.items if post.draft==False]
-    return render_template('index.html',title = '首页',posts=posts,
-                           pagination=pagination, Permission=Permission)
-
-@app.route('/login', methods=['GET','POST'])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user is not None and user.verify_password(form.password.data):
-            login_user(user, form.remember_me.data)
-            return redirect(request.args.get('next') or url_for('index'))
-        flash('账号或密码无效。')
-    return render_template('login.html',
-                           title = '登录',
-                           form =form)
-
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    flash('你已经登出账号。')
-    return redirect(url_for('index'))
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    form = RegisterForm()
-    if form.validate_on_submit():
-        user = User(email=form.email.data,
-                    nickname=form.nickname.data,
-                    password=form.password.data)
-        db.session.add(user)
-        flash('你可以登录了。')
-        return redirect(url_for('login'))
-    return render_template('register.html',
-                           form=form,
-                           title='注册')
-
-@app.route('/changepassword', methods=['GET','POST'])
-@login_required
-def change_password():
-    form = ChangePasswordForm()
-    if form.validate_on_submit():
-        if current_user.verify_password(form.old_password.data):
-            current_user.password = form.password.data
-            db.session.add(current_user)
-            flash('你的密码已经更改。')
-            return redirect(url_for('index'))
-        else:
-            flash('无效的密码。')
-    return render_template('change_password.html',
-                           form=form,
-                           title='更改密码')
-
-@app.route('/user/<nickname>')
-# @login_required
-def user(nickname):
-    user = User.query.filter_by(nickname = nickname).first()
-    if user == None:
-        flash('未发现用户：' + nickname)
-        return redirect(url_for('index'))
-    posts = user.posts.order_by(Post.timestamp.desc()).all()
-    return render_template('user.html',
-                           user=user,
-                           posts=posts,
-                           Permission=Permission,
-                           title='个人资料')
 
 # 用户最后一次访问时间,全文搜索
-@app.before_request
+@user.before_request
 def before_request():
     if current_user.is_authenticated:
         current_user.last_seen = datetime.now()
@@ -104,24 +17,55 @@ def before_request():
         db.session.commit()
     g.search_form = SearchForm()
 
+@user.route('/')
+@user.route('/index')
+def index():
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=current_app.config['POSTS_PER_PAGE'],
+        error_out=False
+    )
+    # posts = pagination.items
+    posts = [post for post in pagination.items if post.draft==False]
+    return render_template('user/index.html',
+                           title = '首页',
+                           posts=posts,
+                           pagination=pagination)
+
+@user.route('/user/<nickname>')
+# @login_required
+def users(nickname):
+    user = User.query.filter_by(nickname = nickname).first()
+    if user == None:
+        flash('未发现用户：' + nickname)
+        return redirect(url_for('user.index'))
+    posts = user.posts.order_by(Post.timestamp.desc()).all()
+    posts = [post for post in posts if post.draft == False]
+    return render_template('user/user.html',
+                           user=user,
+                           posts=posts,
+                           title='个人资料')
+
 # 编辑用户资料
-@app.route('/editprofile', methods=['GET','POST'])
+@user.route('/edit_profile', methods=['GET','POST'])
 @login_required
-def editprofile():
+def edit_profile():
     form = ProfileForm()
     if form.validate_on_submit():
         current_user.nickname = form.nickname.data
         current_user.about_me = form.about_me.data
         db.session.add(current_user)
         flash('更改资料成功。')
-        return redirect(url_for('editprofile'))
+        return redirect(url_for('user.edit_profile'))
     else:
         form.nickname.data = current_user.nickname
         form.about_me.data = current_user.about_me
-    return render_template('editprofile.html', form=form, title='编辑资料')
+    return render_template('user/editprofile.html',
+                           form=form,
+                           title='编辑资料')
 
 # 博客文章
-@app.route('/write', methods=['GET','POST'])
+@user.route('/write', methods=['GET','POST'])
 def write():
     form = PostForm()
     if current_user.operation(Permission.WRITE_ARTICLES) and \
@@ -139,27 +83,41 @@ def write():
                         author=current_user._get_current_object())
             db.session.add(post)
             flash('发布成功！')
-        return redirect(url_for('write'))
-    return render_template('write.html', form=form, post=form.body.data,
+        return redirect(url_for('user.write'))
+    return render_template('user/write.html',
+                           form=form,
+                           post=form.body.data,
                            title='写文章')
 
 # 草稿
-@app.route('/draft/')
+@user.route('/draft/')
 @login_required
 def draft():
     page = request.args.get('page', 1, type=int)
     pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
-        page, per_page=app.config['POSTS_PER_PAGE'],
+        page, per_page=current_app.config['POSTS_PER_PAGE'],
         error_out=False
     )
     posts = pagination.items
     drafts = [post for post in posts if post.draft==True]
 
-    return render_template('draft.html', title='草稿',
-                           pagination=pagination, drafts=drafts)
+    return render_template('user/draft.html',
+                           title='草稿',
+                           pagination=pagination,
+                           drafts=drafts)
+# 删除草稿
+@user.route('/delete-draft/<int:id>')
+@login_required
+def delete_draft(id):
+    draft = Post.query.get_or_404(id)
+    draft.disabled = True
+    db.session.add(draft)
+    flash('删除草稿成功。')
+    return redirect(url_for('user.draft'))
+
 
 # 文章详情
-@app.route('/post/<int:id>', methods=['GET','POST'])
+@user.route('/post/<int:id>', methods=['GET','POST'])
 def post(id):
     post = Post.query.get_or_404(id)
     post.view_num += 1
@@ -167,58 +125,60 @@ def post(id):
     # 评论
     form = CommentForm()
     if form.validate_on_submit():
-        comment = Comment(body=form.body.data, post=post,
+        comment = Comment(body=form.body.data,
+                          post=post,
                           author=current_user._get_current_object())
         db.session.add(comment)
         flash('你的评论已经发表成功。')
-        return redirect(url_for('post', id=post.id, page=-1))
+        return redirect(url_for('user.post', id=post.id, page=-1))
     page = request.args.get('page', 1, type=int)
     if page == -1:
         page = (post.comments.count() - 1) / \
-            app.config['COMMENTS_PER_PAGE'] + 1
+               current_app.config['COMMENTS_PER_PAGE'] + 1
     pagination = post.comments.order_by(Comment.timestamp.asc()).paginate(
-        page, per_page=app.config['COMMENTS_PER_PAGE'],
+        page, per_page=current_app.config['COMMENTS_PER_PAGE'],
         error_out=False
     )
     comments = pagination.items
-    return render_template('post.html', posts=[post],
-                           title=post.title,id=post.id,post=post,
-                           form=form, comments=comments,
+    return render_template('user/post.html', posts=[post],
+                           title=post.title, id=post.id,
+                           post=post, form=form,
+                           comments=comments,
                            pagination=pagination)
 
 # 点赞
-@app.route('/like/<int:id>')
+@user.route('/like/<int:id>')
 @login_required
 def like(id):
     post = Post.query.get_or_404(id)
 
     if post.like_num.filter_by(liker_id=current_user.id).first() is not None:
         flash('你已经点赞。')
-        return redirect(url_for('post', id=post.id))
+        return redirect(url_for('user.post', id=post.id))
     like = Like(post=post,
                 user=current_user._get_current_object())
     db.session.add(like)
     flash('点赞成功！')
-    return redirect(url_for('post', id=post.id))
+    return redirect(url_for('user.post', id=post.id))
 
 # 取消赞
-@app.route('/unlike/<int:id>')
+@user.route('/unlike/<int:id>')
 @login_required
 def unlike(id):
     post = Post.query.get_or_404(id)
     if post.like_num.filter_by(liker_id=current_user.id).first() is None:
         flash('你还未点赞。')
-        return redirect(url_for('post', id=post.id))
+        return redirect(url_for('user.post', id=post.id))
     # like = Like(post=post,
     #             user=current_user._get_current_object())
     else:
         f = post.like_num.filter_by(liker_id=current_user.id).first()
         db.session.delete(f)
         flash('已取消点赞。')
-        return redirect(url_for('post', id=post.id))
+        return redirect(url_for('user.post', id=post.id))
 
 # 交互回复评论
-@app.route('/reply/<int:id>', methods=['GET','POST'])
+@user.route('/reply/<int:id>', methods=['GET','POST'])
 @login_required
 def reply(id):
     comment = Comment.query.get_or_404(id)
@@ -232,32 +192,34 @@ def reply(id):
                             author=current_user._get_current_object())
         db.session.add(reply_comment)
         flash('你的回复已经发表。')
-        return redirect(url_for('post', id=comment.post_id, page=page))
-    return render_template('reply.html', form=form, comment=comment, title='回复')
-
+        return redirect(url_for('user.post', id=comment.post_id, page=page))
+    return render_template('user/reply.html',
+                           form=form,
+                           comment=comment,
+                           title='回复')
 
 # 管理评论
 # 恢复评论，即是将Comment模型的disabled的布尔值设为Flase
-@app.route('/recover/<int:id>')
+@user.route('/recover/<int:id>')
 @login_required
 def recover(id):
     comment = Comment.query.get_or_404(id)
     post_id = comment.post_id
     comment.disabled = False
     db.session.add(comment)
-    return redirect(url_for('post',id=post_id))
+    return redirect(url_for('user.post',id=post_id))
 # 删除评论
-@app.route('/delate/<int:id>')
+@user.route('/delate/<int:id>')
 @login_required
 def delate(id):
     comment = Comment.query.get_or_404(id)
     post_id = comment.post_id
     comment.disabled = True
     db.session.add(comment)
-    return redirect(url_for('post',id=post_id))
+    return redirect(url_for('user.post',id=post_id))
 
 # 编辑文章
-@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+@user.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit(id):
     post = Post.query.get_or_404(id)
@@ -275,62 +237,64 @@ def edit(id):
                 post.draft = False
                 db.session.add(post)
                 flash('发布成功')
-            return redirect(url_for('edit', id=post.id))
+            return redirect(url_for('user.edit', id=post.id))
         else:
             db.session.add(post)
             flash('更新成功。')
-            return redirect(url_for('post', id=post.id))
+            return redirect(url_for('user.post', id=post.id))
     form.title.data = post.title
     form.body.data = post.body
-    return render_template('editpost.html', form=form,
-                           post=post, title='编辑文章')
+    return render_template('user/editpost.html',
+                           form=form,
+                           post=post,
+                           title='编辑文章')
 
 # 关注路由
-@app.route('/follow/<nickname>')
+@user.route('/follow/<nickname>')
 @login_required
 @permission_required(Permission.FOLLOW)
 def follow(nickname):
     user = User.query.filter_by(nickname=nickname).first()
     if user is None:
         flash('无效的用户。')
-        return redirect(url_for('index'))
+        return redirect(url_for('user.index'))
     if current_user.is_following(user):
         flash('你已经关注了此用户。')
-        return redirect(url_for('user', nickname=nickname))
+        return redirect(url_for('user.users', nickname=nickname))
     current_user.follow(user)
     flash('你已关注 %s。' % nickname)
-    return redirect(url_for('user', nickname=nickname))
+    return redirect(url_for('user.users', nickname=nickname))
 
 # 取消关注
-@app.route('/unfollow/<nickname>')
+@user.route('/unfollow/<nickname>')
 @login_required
 @permission_required(Permission.FOLLOW)
 def unfollow(nickname):
     user = User.query.filter_by(nickname=nickname).first()
     if user is None:
         flash('无效的用户。')
-        return redirect(url_for('.index'))
+        return redirect(url_for('user.index'))
     if not current_user.is_following(user):
         flash('你已经取消了此用户的关注。')
-        return redirect(url_for('.user', nickname=nickname))
+        return redirect(url_for('user.users', nickname=nickname))
     current_user.unfollow(user)
     flash('你已取消关注 %s 。' % nickname)
-    return redirect(url_for('user', nickname=nickname))
+    return redirect(url_for('user.users', nickname=nickname))
 
 
-@app.route('/follows/<nickname>')
+@user.route('/follows/<nickname>')
 def follows(nickname):
     user = User.query.filter_by(nickname=nickname).first()
     if user is None:
         flash('无效的用户。')
-        return redirect(url_for('index'))
+        return redirect(url_for('user.index'))
     page = request.args.get('page', 1, type=int)
     pagination = user.followers.paginate(
-        page, per_page=app.config['FOLLOWERS_PER_PAGE'],
+        page, per_page=current_app.config['FOLLOWERS_PER_PAGE'],
         error_out=False
     )
     pagination2 = user.followed.paginate(
-        page, per_page=app.config['FOLLOWERS_PER_PAGE'],
+        page, per_page=current_app.config['FOLLOWERS_PER_PAGE'],
         error_out=False
     )
     show_followed = False
@@ -346,36 +310,36 @@ def follows(nickname):
         follows = [{'user': i.followed, 'timestamp': i.timestamp}
                    for i in pagination2.items]
 
-    return render_template('follow.html', user=user,
+    return render_template('user/follow.html', user=user,
                            title='关注',
                            show_followed=show_followed,
                            pagination=pagination,
                            Permission=Permission,
                            posts=posts,
                            follows=follows)
-
-@app.route('/followers/<nickname>')
+# 设置cookies
+@user.route('/followers/<nickname>')
 def show_follower(nickname):
-    resp = make_response(redirect(url_for('follows',nickname=nickname)))
+    resp = make_response(redirect(url_for('user.follows',nickname=nickname)))
     resp.set_cookie('show_followed','1',max_age=30*24*60*60)
     return resp
-@app.route('/followed/<nickname>')
+@user.route('/followed/<nickname>')
 def show_followed(nickname):
-    resp = make_response(redirect(url_for('follows',nickname=nickname)))
+    resp = make_response(redirect(url_for('user.follows',nickname=nickname)))
     resp.set_cookie('show_followed','',max_age=30*24*60*60)
     return resp
 
 # 全文搜索
-@app.route('/search', methods=['GET','POST'])
+@user.route('/search', methods=['GET','POST'])
 def search():
     if not g.search_form.validate_on_submit():
-        return redirect(url_for('index'))
-    return redirect(url_for('search_results', query=g.search_form.search.data))
+        return redirect(url_for('user.index'))
+    return redirect(url_for('user.search_results', query=g.search_form.search.data))
 # 搜索结果
-@app.route('/search_results/<query>')
+@user.route('/search_results/<query>')
 def search_results(query):
     results = Post.query.whooshee_search(query).all()
-    return render_template('search_results.html',query=query,
-                           title='搜索结果',posts=results)
-
-
+    return render_template('user/search_results.html',
+                           query=query,
+                           title='搜索结果',
+                           posts=results)

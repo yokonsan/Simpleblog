@@ -13,12 +13,12 @@
         {% endif %}
         </h3><br>
         {% if current_user.operation(Permission.WRITE_ARTICLES) %}
-        <a href="{{url_for('write')}}">
+        <a href="{{url_for('user.write')}}">
             <button type="button" class="btn btn-default btn-sm">
                 <span class="glyphicon glyphicon-pencil"></span> 写文章
             </button>
         </a> |
-        <a href="{{ url_for('draft') }}">
+        <a href="{{ url_for('user.draft') }}">
             <button type="button" class="btn btn-default btn-sm">
               <span class="glyphicon glyphicon-file"></span> 草稿
             </button>
@@ -26,7 +26,7 @@
         {% endif %}
         {% if current_user.operation(Permission.ADMINISTER) %}
         |
-        <a href="{{ url_for('admin') }}">
+        <a href="{{ url_for('admin.index') }}">
             <button type="button" class="btn btn-default btn-sm">
               <span class="glyphicon glyphicon-cog"></span> 管理网站
             </button>
@@ -42,7 +42,7 @@
 {% endif %}
 {% endfor %}
 <div class="pagination">
-{{ page.pages(pagination, 'index') }}
+{{ page.pages(pagination, 'user.index') }}
 </div>
 {% endif %}
 {% endblock %}

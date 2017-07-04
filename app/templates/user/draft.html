@@ -4,6 +4,7 @@
 <h1>草稿</h1><hr>
 {% if drafts %}
 {% for draft in drafts %}
+{% if draft.disabled != True %}
     <ol>
         <li>
             <h4>{{ draft.title }}</h4>
@@ -14,10 +15,11 @@
                     {{ draft.body | truncate(100) }}
                 {% endif %}
             </p>
-            <a class="taga" href="{{ url_for('delate',id=draft.id) }}"><span class="label label-danger">删除</span></a>
-            <a class="taga" href="{{ url_for('edit',id=draft.id) }}"><span class="label label-primary">编辑</span></a>
+            <a class="taga" href="{{ url_for('user.delete_draft',id=draft.id) }}"><span class="label label-danger">删除</span></a>
+            <a class="taga" href="{{ url_for('user.edit',id=draft.id) }}"><span class="label label-primary">编辑</span></a>
         </li><hr>
     </ol>
+{% endif %}
 {% endfor %}
 {% endif %}
 {% endblock %}
