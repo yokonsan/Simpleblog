@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row clearfix">
+    <div class="col-md-3 column">
+        <a href="{{ url_for('message.letter_message') }}" class="list-group-item btn btn-info btn-lg">
+          <span class="glyphicon glyphicon-envelope"></span> 私信
+        </a><hr>
+        <a href="{{ url_for('message.comment_message') }}" class="list-group-item">
+            <span class="badge">{{ comments }}</span><span class="glyphicon glyphicon-comment"></span> 评论
+        </a>
+        <a href="{{ url_for('message.like_message') }}" class="list-group-item">
+            <span class="badge">{{ likes }}</span><span class="glyphicon glyphicon-thumbs-up"></span> 点赞
+        </a>
+        <a href="#" class="list-group-item active">
+            <span class="glyphicon glyphicon-star"></span> 关注
+        </a>
+    </div>
+    <div class="col-md-9 column">
+        最近获得的关注<hr>
+        {% if follows == [] %}
+        <h4>最近没有人关注过你哦。</h4>
+        {% else %}
+        <ul class="list-group">
+            {% for follow in follows %}
+            <li class="list-group-item">
+                <div>
+                    <a href="{{ url_for('user.users',nickname=follow.followed.nickname) }}">
+                        {{ follow.followed.nickname }}
+                    </a>关注了你。
+                    <span class="right"><i>{{ moment(follow.timestamp).fromNow() }}</i></span>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

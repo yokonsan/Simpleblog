@@ -38,6 +38,10 @@
 						<a href="{{ url_for('auth.register') }}">注册</a>
 						{% endif %}
 					</li>
+					<!--消息-->
+					<li {% if title=='消息' %}class="active"{% endif %}>
+						<a href="{{ url_for('message.comment_message') }}">消息</a>
+					</li>
 				</ul>
 				<form class="navbar-form navbar-left" method="post" action="{{url_for('user.search')}}" role="search">
 					{{ g.search_form.hidden_tag() }}

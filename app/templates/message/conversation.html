@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row clearfix">
+    <div class="col-md-3 column">
+        {{ for conv in conversations }}
+        <table>
+            <tr valign="top">
+                <td><img class="images" src="{{user.gravatar(200)}}"></td>
+                <td>
+                    <h1>{{conv.to_user.nickname}}</h1>
+                    {% if conv.to_user.about_me %}<p>{{conv.to_user.about_me}}</p>{% endif %}
+                    {% if conv.to_user.last_seen %}<p><i>{{conv.to_user.last_seen}}</i></p>{% endif %}
+                </td>
+            </tr>
+        </table>
+        <hr>
+        <table>
+            <tr valign="top">
+                <td><img class="images" src="{{user.gravatar(200)}}"></td>
+                <td>
+                    <h1>{{curren_user.nickname}}</h1>
+                    {% if curren_user.about_me %}<p>{{curren_user.about_me}}</p>{% endif %}
+                    {% if curren_user.last_seen %}<p><i>{{curren_user.last_seen}}</i></p>{% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="col-md-9 column">
+        <a href="{{ url_for('message.letter_message') }}">返回私信列表</a>
+        <span>与{{ con.to_user }}的对话</span><hr>
+
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

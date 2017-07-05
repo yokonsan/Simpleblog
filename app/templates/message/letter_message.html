@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row clearfix">
+    <div class="col-md-3 column">
+        <a href="#" class="list-group-item btn btn-info btn-lg">
+          <span class="glyphicon glyphicon-envelope"></span> 私信
+        </a><hr>
+        <a href="{{ url_for('message.comment.message') }}" class="list-group-item active">
+            <span class="badge">{{ like }}</span><span class="glyphicon glyphicon-comment"></span> 评论
+        </a>
+        <a href="{{ url_for('message.like_message') }}" class="list-group-item">
+            <span class="badge">{{ like }}</span><span class="glyphicon glyphicon-thumbs-up"></span> 点赞
+        </a>
+        <a href="{{ url_for('message.follow_message') }}" class="list-group-item">
+            <span class="badge">{{ follow }}</span><span class="glyphicon glyphicon-star"></span> 关注
+        </a>
+    </div>
+    <div class="col-md-9 column">
+        全部私信<hr>
+        {% if not conversation %}
+        <h4>还没有收到过私信哦。</h4>
+        {% else %}
+        <ul class="list-group">
+            {% for conv in conversations %}
+            <li class="list-group-item">
+                <a href="{{ url_for('user.users',nickname=conv.from_user.nickname) }}">
+                    {{ conv.from_user.nickname }}
+                </a>给你发了封私信。
+                <a href="{{ url_for('write_letter',id=conv.id) }}">查看>>></a>
+            </li><br>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
