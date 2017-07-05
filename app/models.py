@@ -66,7 +66,10 @@ class Follow(db.Model):
     __tablename__ = 'follows'
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     followed_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    unread = db.Column(db.Boolean, default=True)
     timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    # messages = db.relationship('Message', backref='follow', uselist=False)
 
 class User(UserMixin,db.Model):
     __tablename__ = 'users'
@@ -247,10 +250,12 @@ lm.anonymous_user = AnonymousUser
 class Like(db.Model):
     __tablename__ = 'likes'
     id = db.Column(db.Integer, primary_key=True)
+    unread = db.Column(db.Boolean, default=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
 
     liker_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    #messages = db.relationship('Message', backref='like', uselist=False)
 
 class Comment(db.Model):
     __tablename__ = 'comments'
@@ -261,9 +266,11 @@ class Comment(db.Model):
     disabled = db.Column(db.Boolean)
     comment_type = db.Column(db.String(64), default='comment')
     reply_to = db.Column(db.String(128), default='notReply')
+    unread = db.Column(db.Boolean)
 
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    # messages = db.relationship('Message', backref='comment', uselist=False)
     # reply_comment = db.relationship('Reply', backref='comment', lazy='dynamic')
 
     @staticmethod
@@ -276,44 +283,39 @@ class Comment(db.Model):
             tags=allowed_tags, strip=True
         ))
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)
-#
-# # 会话
-# class Conversation(db.Model):
-#     __tablename__ = 'conversations'
-#     id = db.Column(db.Integer, primary_key=True)
-#     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-#     from_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-#     to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-#     body = db.Column(db.String(255), nullable=True)
-#     draft = db.Column(db.Boolean, default=False)
-#     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
-#
-#     trash = db.Column(db.Boolean, default=False)
-#     unread = db.Column(db.Boolean, default=False)
-#
-#     messages = db.relationship('Message', lazy='joined', backref='conversation',
-#                                primaryjoin='Message.conversation_id == Conversation.id',
-#                                order_by = 'asc(Message.id)', cascade='all, delete-orphan')
-#     user = db.relationship('User', lazy='joined', foreign_keys=[user_id])
-#     to_user = db.relationship('User', lazy='joined', foreign_keys=[to_user_id])
-#     from_user = db.relationship('User', lazy='joined', foreign_keys=[from_user_id])
-#
-#     @property
-#     def first_message(self):
-#         return self.messages[0]
-#     @property
-#     def last_message(self):
-#         return self.messages[-1]
-#
-# # 消息
-# class Message(db.Model):
-#     __tablename__ = 'messages'
-#     id = db.Column(db.Integer, primary_key=True)
-#     conversation_id = db.Column(db.Integer, db.ForeignKey('conversations.id'))
-#     # 发起消息的人
-#     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-#     message = db.Column(db.Text)
-#     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
-#
-#     user = db.relationship('User', lazy='joined')
+
+# 会话
+class Conversation(db.Model):
+    __tablename__ = 'conversations'
+    id = db.Column(db.Integer, primary_key=True)
+    from_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    to_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    letter = db.Column(db.String(255))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
+    unread = db.Column(db.Boolean, default=True)
+
+    messages = db.relationship('Message', lazy='joined', backref='conversation',
+                               primaryjoin='Message.conversation_id == Conversation.id',
+                               order_by = 'asc(Message.id)', cascade='all, delete-orphan')
+    to_user = db.relationship('User', lazy='joined', foreign_keys=[to_user_id])
+    from_user = db.relationship('User', lazy='joined', foreign_keys=[from_user_id])
+
+    @property
+    def first_message(self):
+        return self.messages[0]
+    @property
+    def last_message(self):
+        return self.messages[-1]
+
+# 消息
+class Message(db.Model):
+    __tablename__ = 'messages'
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_id = db.Column(db.Integer, db.ForeignKey('conversations.id'))
+    # 发私信的人
+    from_user = db.Column(db.Integer, db.ForeignKey('users.id'))
+    message = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
+
+    user = db.relationship('User', lazy='joined')
 

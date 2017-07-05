@@ -64,7 +64,7 @@ def edit_profile():
                            form=form,
                            title='编辑资料')
 
-# 博客文章
+# 写博客文章
 @user.route('/write', methods=['GET','POST'])
 def write():
     form = PostForm()
@@ -126,7 +126,7 @@ def post(id):
     form = CommentForm()
     if form.validate_on_submit():
         comment = Comment(body=form.body.data,
-                          post=post,
+                          post=post, unread=True,
                           author=current_user._get_current_object())
         db.session.add(comment)
         flash('你的评论已经发表成功。')
@@ -155,7 +155,7 @@ def like(id):
     if post.like_num.filter_by(liker_id=current_user.id).first() is not None:
         flash('你已经点赞。')
         return redirect(url_for('user.post', id=post.id))
-    like = Like(post=post,
+    like = Like(post=post, unread=True,
                 user=current_user._get_current_object())
     db.session.add(like)
     flash('点赞成功！')
@@ -187,9 +187,10 @@ def reply(id):
     form = ReplyForm()
     if form.validate_on_submit():
         reply_comment = Comment(body=form.body.data,
-                            post=post,comment_type='reply',
-                            reply_to=comment.author.nickname,
-                            author=current_user._get_current_object())
+                                unread=True,
+                                post=post,comment_type='reply',
+                                reply_to=comment.author.nickname,
+                                author=current_user._get_current_object())
         db.session.add(reply_comment)
         flash('你的回复已经发表。')
         return redirect(url_for('user.post', id=comment.post_id, page=page))

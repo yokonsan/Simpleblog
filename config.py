@@ -24,6 +24,8 @@ class Config:
     FOLLOWERS_PER_PAGE = 50
     # 评论分页
     COMMENTS_PER_PAGE = 20
+    # 消息分页
+    MESSAGES_PER_PAGE = 20
 
     WHOOSHEE_MIN_STRING_LEN = 1
 
