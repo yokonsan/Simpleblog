@@ -2,7 +2,7 @@ from .. import db
 from . import message
 from flask import redirect, render_template, current_app, request, g, flash, url_for
 from flask_login import login_required, current_user
-from ..models import User, Message, Comment, Conversation, Post, Permission
+from ..models import User, Conversation, Post, Permission
 from ..user.forms import SearchForm
 from datetime import datetime
 from .forms import LetterForm
@@ -154,12 +154,18 @@ def letter_message():
 @message.route('/write_letter/<int:id>', methods=['GET','POST'])
 @login_required
 def write_letter(id):
-    conversations = Conversation.query.filter_by(
+    send_conv = Conversation.query.filter_by(
         to_user_id = id,
-        form_user_id = current_user.id
-    ).first()
-    for conv in conversations:
-        conv.unread = False
+        from_user_id = current_user.id
+    ).all()
+    receive_conv = Conversation.query.filter_by(
+        to_user_id = current_user.id,
+        from_user_id = id
+    ).all()
+    if receive_conv:
+        for conv in receive_conv:
+            conv.unread = False
+
     form = LetterForm()
     if current_user.operation(Permission.WRITE_ARTICLES) and \
             form.validate_on_submit():
@@ -170,16 +176,18 @@ def write_letter(id):
                                     unread=True)
         db.session.add(conversation)
         flash('发送私信成功。')
-        return redirect(url_for('message.write_letter'))
+        return redirect(url_for('message.write_letter',id=id))
     return render_template('message/conversation.html',
                            title='消息',
-                           conversations=conversations,
+                           receive_conv = receive_conv,
+                           send_conv = send_conv,
+                           all = max(len(receive_conv),len(send_conv)),
                            form=form)
 
 # 删除会话
 @message.route('delete_letter/<int:id>')
 @login_required
-def view_letter(id):
+def delete_letter(id):
     conversation = Conversation.query.filter_by(
                                 id=id,
                                 to_user_id=current_user.id).first_or_404()
@@ -187,5 +195,3 @@ def view_letter(id):
     flash('你已删除此条私信。')
 
     return redirect(url_for('message.letter_message'))
-
-#

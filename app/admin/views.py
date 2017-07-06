@@ -2,11 +2,12 @@ from .. import db
 from flask_login import login_required, current_user
 from ..decorators import admin_required
 from flask import render_template, redirect, url_for, request, current_app
-from ..models import Comment, Post
+from ..models import Comment, Post, Admin
 from . import admin
 from flask import g
 from ..user.forms import SearchForm
 from datetime import datetime
+from .forms import NoticeForm
 
 
 # 用户最后一次访问时间,全文搜索
@@ -94,3 +95,23 @@ def delate_post(id):
     post.disabled = True
     db.session.add(post)
     return redirect(url_for('admin.admin_post'))
+
+# 添加公告
+@admin.route('/notice', methods=['GET','POST'])
+@login_required
+@admin_required
+def add_notice():
+    notice = Admin.query.order_by(Admin.timestamp.desc()).first()
+    if notice:
+        db.session.delete(notice)
+    form = NoticeForm()
+    if form.validate_on_submit():
+        admin = Admin(
+            notice = form.body.data
+        )
+        db.session.add(admin)
+        return redirect(url_for('admin.index'))
+    return render_template('admin/admin_notice.html',
+                           title='网站公告',
+                           form=form)
+

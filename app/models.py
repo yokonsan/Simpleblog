@@ -255,7 +255,6 @@ class Like(db.Model):
 
     liker_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-    #messages = db.relationship('Message', backref='like', uselist=False)
 
 class Comment(db.Model):
     __tablename__ = 'comments'
@@ -270,8 +269,6 @@ class Comment(db.Model):
 
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-    # messages = db.relationship('Message', backref='comment', uselist=False)
-    # reply_comment = db.relationship('Reply', backref='comment', lazy='dynamic')
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
@@ -294,28 +291,15 @@ class Conversation(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
     unread = db.Column(db.Boolean, default=True)
 
-    messages = db.relationship('Message', lazy='joined', backref='conversation',
-                               primaryjoin='Message.conversation_id == Conversation.id',
-                               order_by = 'asc(Message.id)', cascade='all, delete-orphan')
     to_user = db.relationship('User', lazy='joined', foreign_keys=[to_user_id])
     from_user = db.relationship('User', lazy='joined', foreign_keys=[from_user_id])
 
-    @property
-    def first_message(self):
-        return self.messages[0]
-    @property
-    def last_message(self):
-        return self.messages[-1]
-
-# 消息
-class Message(db.Model):
-    __tablename__ = 'messages'
+# 管理
+class Admin(db.Model):
+    __tablename__ = 'admin'
     id = db.Column(db.Integer, primary_key=True)
-    conversation_id = db.Column(db.Integer, db.ForeignKey('conversations.id'))
-    # 发私信的人
-    from_user = db.Column(db.Integer, db.ForeignKey('users.id'))
-    message = db.Column(db.Text)
+    notice = db.Column(db.String(25))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow())
 
-    user = db.relationship('User', lazy='joined')
-
+    def __repr__(self):
+        return '<Admin %r>' % (self.notice)
