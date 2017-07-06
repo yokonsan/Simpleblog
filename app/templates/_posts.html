@@ -22,7 +22,7 @@
 </h5>
 <p>
     {% if post.body_html %}
-        {{ post.body_html | safe | truncate(250) }}
+        {{ post.body_html | truncate(250) }}
     {% else %}
         {{post.body | truncate(250)}}
     {% endif %}

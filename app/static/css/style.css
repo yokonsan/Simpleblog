@@ -18,6 +18,9 @@ body{
 .images{
     margin-right: 20px;
 }
+.images2{
+    margin-left: 20px;
+}
 .taga{
     color: #dde6ef;
 }
@@ -31,7 +34,7 @@ body{
 }
 
 .footer {
-	background: rgb(85, 85, 85);
+	background: #2a2727;
 	padding: 15px 0 5px;
 	font-size: 13px;
     position: relative;
@@ -41,7 +44,7 @@ body{
 }
 .footer-content {
     text-align: center;
-    color: #8a6d3b;
+    color: #f8b136;
 }
 .footer-content a {
     text-decoration: none;
@@ -53,4 +56,7 @@ body{
     top: 50%;
     right: 0;
     z-index: 9999999;
+}
+.letter{
+    margin: 100px;
 }

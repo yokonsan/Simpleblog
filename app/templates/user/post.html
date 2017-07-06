@@ -163,7 +163,7 @@
     {% endfor %}<br>
     <p>
         {% if current_user.is_authenticated %}
-        <input type="submit" value="发表">
+        <input class="btn btn-default" type="submit" value="发表">
         {% else %}
         <a href="{{ url_for('auth.login') }}">
             <h4>还没有登录哦，前往登录</h4>

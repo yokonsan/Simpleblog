@@ -9,11 +9,13 @@
             {% if user.about_me %}<p>{{user.about_me}}</p>{% endif %}
             {% if user.last_seen %}<p><i>最后离开时间：{{user.last_seen}}</i></p>{% endif %}
             {% if user == current_user %}
-            <p><a href="{{url_for('user.edit_profile')}}">
-                <button type="button" class="btn btn-default btn-sm">
-                  <span class="glyphicon glyphicon-cog"></span> 修改资料
-                </button>
-            </a> </p>
+            <p>
+            <a href="{{url_for('user.edit_profile')}}">
+            <button type="button" class="btn btn-default btn-sm">
+              <span class="glyphicon glyphicon-cog"></span> 修改资料
+            </button>
+            </a>
+            </p>
             {% endif %}
             <!--关注者-->
             {% if current_user.operation(Permission.FOLLOW) and user != current_user %}
@@ -40,6 +42,12 @@
             {% if current_user.is_authenticated and user != current_user and
                 user.is_following(current_user) %}
             | <span>关注了你</span>
+            {% endif %}
+
+            {% if current_user != user %}
+            <a href="{{ url_for('message.write_letter',id=user.id) }}" class="btn btn-info">
+              <span class="glyphicon glyphicon-envelope"></span> 写私信
+            </a>
             {% endif %}
         </td>
     </tr>

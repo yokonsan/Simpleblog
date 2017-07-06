@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>你好啊，管理员。给网站添加公告吧。</h3><hr>
+<form action="" method="post" name="notice">
+    {{form.hidden_tag()}}
+    <h4>网站公告</h4>
+    {{form.body(class="form-control",rows="3")}}<br>
+    {% for error in form.body.errors %}
+        <span style="color: red;">[{{error}}]</span>
+    {% endfor %}<br>
+    <p>
+        <input class="btn btn-default right" type="submit" value="添加">
+    </p>
+</form>
+{% endblock %}
