@@ -1,10 +1,11 @@
-from .. import db
-from . import user
+from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request, abort, make_response, g, current_app
 from flask_login import current_user, login_required
+
+from .. import db
+from . import user
 from .forms import ProfileForm, PostForm, CommentForm, ReplyForm, SearchForm, EditpostForm
 from ..models import User, Post, Comment, Like, Permission, Admin
-from datetime import datetime
 from ..decorators import permission_required
 
 
@@ -21,6 +22,8 @@ def before_request():
 @user.route('/index')
 def index():
     notice = Admin.query.order_by(Admin.timestamp.desc()).first()
+    if notice:
+        notice=notice.notice
     page = request.args.get('page', 1, type=int)
     pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
         page, per_page=current_app.config['POSTS_PER_PAGE'],
@@ -31,7 +34,7 @@ def index():
     return render_template('user/index.html',
                            title = '首页',
                            posts=posts,
-                           notice=notice.notice,
+                           notice=notice,
                            pagination=pagination)
 
 @user.route('/user/<nickname>')
@@ -287,6 +290,7 @@ def unfollow(nickname):
 
 @user.route('/follows/<nickname>')
 def follows(nickname):
+
     user = User.query.filter_by(nickname=nickname).first()
     if user is None:
         flash('无效的用户。')

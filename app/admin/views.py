@@ -1,12 +1,13 @@
-from .. import db
+from datetime import datetime
+from flask import g
 from flask_login import login_required, current_user
-from ..decorators import admin_required
 from flask import render_template, redirect, url_for, request, current_app
+
+from .. import db
 from ..models import Comment, Post, Admin
 from . import admin
-from flask import g
+from ..decorators import admin_required
 from ..user.forms import SearchForm
-from datetime import datetime
 from .forms import NoticeForm
 
 
@@ -114,4 +115,3 @@ def add_notice():
     return render_template('admin/admin_notice.html',
                            title='网站公告',
                            form=form)
-

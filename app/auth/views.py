@@ -1,10 +1,11 @@
-from .. import db
+from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request, g
 from flask_login import login_user, logout_user, current_user, login_required
+
+from .. import db
 from .forms import LoginForm, RegisterForm, ChangePasswordForm
 from ..models import User
 from . import auth
-from datetime import datetime
 from ..user.forms import SearchForm
 
 

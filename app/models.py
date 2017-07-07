@@ -1,11 +1,14 @@
 import datetime
-from app import db, lm, whooshee
 from flask_login import UserMixin, AnonymousUserMixin
-from flask import current_app
+from flask import current_app, request, url_for
 from hashlib import md5
 from werkzeug.security import generate_password_hash, check_password_hash
 from markdown import markdown
 import bleach
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+
+from app.exceptions import ValidationError
+from app import db, lm, whooshee
 
 
 """
@@ -59,6 +62,10 @@ Post模型也添加disabled字段。
 为了消除外键之间的歧义，定义关系时必须使用可选参数 foreign_keys 指定的外键。
 cascade 参数的值是一组有逗号分隔的层叠选项，all 表示除了 delete-orphan 之外的所有层叠选项。
 all,delete-orphan 的意思是启用所有默认层叠选项，而且还要删除孤儿记录。
+
+在User模型上添加基于令牌的认证方法：
+    generate_auth_token()方法使用编码后的用户id字段值生成一个签名令牌，指定了以秒为单位的过期时间。
+    verify_auth_token()方法接收的参数是一个令牌，如果令牌可用就返回对应的用户。
 """
 
 # 关注关联表
@@ -132,7 +139,7 @@ class User(UserMixin,db.Model):
         return self.followers.filter_by(follower_id=user.id).first() is not None
 
     # 获取关注者文章
-    @staticmethod
+    @property
     def followed_posts(self):
         return Post.query.join(Follow, Follow.followed_id==Post.author_id.filter(
             Follow.follower_id==self.id))
@@ -152,6 +159,33 @@ class User(UserMixin,db.Model):
     # Gravatar提供用户头像
     def gravatar(self, size):
         return 'http://www.gravatar.com/avatar/' + md5(self.email.encode('utf-8')).hexdigest() + '?d=mm&s=' + str(size)
+
+    # 支持基于令牌的认证
+    def generate_auth_token(self, expiration):
+        s = Serializer(current_app.config['ECRET_KEY'],expires_in=expiration)
+        return s.dumps({'id': self.id})
+
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return None
+        return User.query.get(data['id'])
+
+    # 把用户转换成JSON格式的序列化字典
+    # 提供给客户端的内容无需和数据库模型内部完全一致
+    def to_json(self):
+        json_user = {
+            'url': url_for('api.get_user', id=self.id, _external=True),
+            'nickname': self.nickname,
+            'last_seen': self.last_seen,
+            'posts': url_for('api.get_user_posts', id=self.id, _external=True),
+            'followed_posts': url_for('api.get_user_followed_posts', id=self.id, _external=True),
+            'post_count': self.posts.count()
+        }
+        return json_user
 
     def __repr__(self):
         return '<User %r>' % (self.nickname)
@@ -231,6 +265,30 @@ class Post(db.Model):
             markdown(value, output_format='html'),
             tags=allowed_tags, strip=True)
         )
+
+    # 把文章转换成JSON格式的序列化字典
+    def to_json(self):
+        json_post = {
+            'url': url_for('api.get_post', id=self.id, _external=True),
+            'title': self.title,
+            'body': self.body,
+            'body_html': self.body_html,
+            'timestamp': self.timestamp,
+            'author': url_for('api.get_user', id=self.author_id, _external=True),
+            'comments': url_for('api.get_post_comments', id=self.id, _external=True),
+            'comment_count': self.comments.count()
+        }
+        return json_post
+
+    @staticmethod
+    def from_json(json_post):
+        body = json_post.get('body')
+        title = json_post.get('title')
+        if body is None or body == '':
+            raise ValidationError('post does not have a body')
+        if title is None or title == '':
+            raise ValidationError('post does not have a title')
+        return Post(body=body,title=title)
 
     def __repr__(self):
         return '<Post %r>' % (self.body)

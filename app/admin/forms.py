@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms.validators import Length
-from wtforms import TextAreaField, StringField
+from wtforms import TextAreaField
 
 
 class NoticeForm(FlaskForm):

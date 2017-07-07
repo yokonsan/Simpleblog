@@ -44,10 +44,12 @@ def create_app(config_name):
     from .auth import auth as auth_blueprint
     from .admin import admin as admin_blueprint
     from .message import message as message_blueprint
+    from .api_1_0 import api as api_1_0_blueprint
 
     app.register_blueprint(user_blueprint)
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
     app.register_blueprint(admin_blueprint, url_prefix='/admin')
     app.register_blueprint(message_blueprint, url_prefix='/message')
+    app.register_blueprint(api_1_0_blueprint, url_prefix='/api/v1.0')
 
     return app

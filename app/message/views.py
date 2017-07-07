@@ -1,10 +1,11 @@
-from .. import db
-from . import message
+from datetime import datetime
 from flask import redirect, render_template, current_app, request, g, flash, url_for
 from flask_login import login_required, current_user
+
 from ..models import User, Conversation, Post, Permission
 from ..user.forms import SearchForm
-from datetime import datetime
+from .. import db
+from . import message
 from .forms import LetterForm
 
 
