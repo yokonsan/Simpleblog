@@ -2,6 +2,7 @@ alembic==0.9.1
 bleach==2.0.0
 blinker==1.4
 click==6.6
+flask-whooshee==0.4.1
 gunicorn==19.7.1
 psycopg2==2.7.1
 python-editor==1.0.3
