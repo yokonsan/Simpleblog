@@ -28,8 +28,11 @@ class Config:
     COMMENTS_PER_PAGE = 20
     # 消息分页
     MESSAGES_PER_PAGE = 20
-
+    # 全文搜索的最小搜索字符
     WHOOSHEE_MIN_STRING_LEN = 1
+    # 是否使用SSL
+    SSL_DISABLE = True
+
 
     @staticmethod
     def init_app(app):
@@ -72,9 +75,31 @@ class ProductionConfig(Config):
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)
 
+class HerokuConfig(ProductionConfig):
+    """
+    Heroku中，日志必须写入 stdout 或 stderr
+    直接为Heroku新建配置类，以ProductionConfig为基类
+    """
+    SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
+
+    @classmethod
+    def init_app(cls, app):
+        ProductionConfig.init_app(app)
+
+        # 处理代理服务器首部
+        from werkzeug.contrib.fixers import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app)
+        # 输出到stderr
+        import logging
+        from logging import StreamHandler
+        file_handler = StreamHandler()
+        file_handler.setLevel(logging.WARNING)
+        app.logger.addHandler(file_handler)
+
 config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
     'production': ProductionConfig,
+    'heroku': HerokuConfig,
     'default': DevelopmentConfig
 }
