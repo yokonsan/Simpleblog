@@ -31,17 +31,9 @@ def create_app(config_name):
     pagedown.init_app(app)
     whooshee.init_app(app)
 
-    if not app.debug:
-        import logging
-        from logging.handlers import RotatingFileHandler
-        file_handler = RotatingFileHandler('tmp/microblog.log', 'a',
-                                           1 * 1024 * 1024, 10)
-        file_handler.setLevel(logging.INFO)
-        file_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-        app.logger.addHandler(file_handler)
-        app.logger.setLevel(logging.INFO)
-        app.logger.info('microblog startup')
+    if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
+        from flask_sslify import SSLify
+        sslify = SSLify(app)
 
     from .user import user as user_blueprint
     from .auth import auth as auth_blueprint
