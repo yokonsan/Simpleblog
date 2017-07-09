@@ -2,7 +2,7 @@
 
 ### 简介
 
-这是一个使用`Python`的`Flask`框架，模仿<a href="http://www.jianshu.com/">简书</a>，
+这是一个使用 `Python` 的 `Flask` 框架，模仿<a href="http://www.jianshu.com/">简书</a>，
 写的一个简单的，适合多人使用的社交型网站。
 
 ### 地址
@@ -18,7 +18,7 @@
 	<li>发布，回复,管理评论</li>
 	<li>设置资料</li>
 	<li>关注用户</li>
-	<li>消息和私信</li>
+	<li>消息通知和私信</li>
 	<li>管理员功能</li>
 </ul>
 
@@ -40,7 +40,7 @@ $ manage.py runserver --host 0.0.0.0
 
 ### Heroku部署
 
-1.注册Heroku账户
+1.注册 `Heroku` 账户
 
 2.安装Heroku Toolbelt，登录Heroku。
 ```
@@ -74,6 +74,7 @@ $ git push heroku master
 $ heroku run python manage.py deploy
 $ heroku restart
 ```
+执行成功，访问`http://<youapp>.herokuapp.com/`。
 
 8.如果程序运行中，发现bug需要改动。直接重复以上步骤，然后执行升级命令：
 ```
