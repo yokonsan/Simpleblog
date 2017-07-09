@@ -141,8 +141,8 @@ class User(UserMixin,db.Model):
     # 获取关注者文章
     @property
     def followed_posts(self):
-        return Post.query.join(Follow, Follow.followed_id==Post.author_id.filter(
-            Follow.follower_id==self.id))
+        return Post.query.join(Follow, Follow.followed_id==Post.author_id).filter(
+            Follow.follower_id==self.id)
 
     # python内置装饰器，把一个方法变为属性调用
     @property

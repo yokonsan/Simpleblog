@@ -18,7 +18,6 @@ Flask-PageDown==0.2.2
 Flask-Script==2.0.5
 Flask-SQLAlchemy==2.2
 Flask-SSLify==0.1.5
-Flask-WhooshAlchemy==0.56
 Flask-WTF==0.14.2
 html5lib==0.999999999
 itsdangerous==0.24

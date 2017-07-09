@@ -307,9 +307,7 @@ def follows(nickname):
     show_followed = False
     if current_user.is_authenticated:
         show_followed = bool(request.cookies.get('show_followed',''))
-        posts = current_user.followed_posts
-    else:
-        posts = Post.query
+
     if show_followed:
         follows = [{'user': i.follower, 'timestamp': i.timestamp}
                    for i in pagination.items]
@@ -322,7 +320,6 @@ def follows(nickname):
                            show_followed=show_followed,
                            pagination=pagination,
                            Permission=Permission,
-                           posts=posts,
                            follows=follows)
 # 设置cookies
 @user.route('/followers/<nickname>')
