@@ -7,7 +7,7 @@
         <td>
             <h1>{{user.nickname}}的资料</h1>
             {% if user.about_me %}<p>{{user.about_me}}</p>{% endif %}
-            {% if user.last_seen %}<p><i>最后离开时间：{{user.last_seen}}</i></p>{% endif %}
+            {% if user.last_seen %}<p><i>最后离开时间：{{moment(user.last_seen).format('LL')}}</i></p>{% endif %}
             {% if user == current_user %}
             <p>
             <a href="{{url_for('user.edit_profile')}}">

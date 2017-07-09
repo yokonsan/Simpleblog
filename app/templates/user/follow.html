@@ -41,8 +41,8 @@
             </div>
             <div class="panel-body">
                 {% if current_user == user %}
-                {% for post in user.followed_posts() %}
-                {% if post.disabled != True %}
+                {% for post in current_user.followed_posts %}
+                {% if not post.disabled and not post.draft %}
                 <a href="{{ url_for('user.post', id=post.id) }}">
                     {{ post.title }}
                 </a><hr>
@@ -50,7 +50,7 @@
                 {% endfor %}
                 {% else %}
                 {% for post in user.posts %}
-                {% if post.disabled != True %}
+                {% if not post.disabled and not post.draft %}
                 <a href="{{ url_for('user.post', id=post.id) }}">
                     {{ post.title }}
                 </a><hr>
