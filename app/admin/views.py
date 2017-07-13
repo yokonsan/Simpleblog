@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from flask import render_template, redirect, url_for, request, current_app
 
 from .. import db
-from ..models import Comment, Post, Admin
+from ..models import Comment, Post, Admin, User
 from . import admin
 from ..decorators import admin_required
 from ..user.forms import SearchForm
@@ -115,3 +115,14 @@ def add_notice():
     return render_template('admin/admin_notice.html',
                            title='网站公告',
                            form=form)
+
+# 获取所有用户
+@admin.route('/users')
+@login_required
+@admin_required
+def admin_user():
+    users = User.query.all()
+
+    return render_template('admin/admin_user.html',
+                           title='所有用户',
+                           users=users)

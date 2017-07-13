@@ -246,6 +246,7 @@ class Post(db.Model):
     view_num = db.Column(db.Integer, default=0)
     body_html = db.Column(db.Text)
     draft = db.Column(db.Boolean, default=False)
+    # outline = db.Column(db.String(250))
     # like_num = db.Column(db.Integer, default=0)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.datetime.utcnow)
 
@@ -263,8 +264,13 @@ class Post(db.Model):
         ]
         target.body_html = bleach.linkify(bleach.clean(
             markdown(value, output_format='html'),
-            tags=allowed_tags, strip=True)
-        )
+            tags=allowed_tags, strip=True,
+            attributes={
+                '*': ['class'],
+                'a': ['href', 'rel'],
+                'img': ['src', 'alt'],  # 支持标签和属性
+            }
+        ))
 
     # 把文章转换成JSON格式的序列化字典
     def to_json(self):

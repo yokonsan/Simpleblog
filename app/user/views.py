@@ -289,6 +289,7 @@ def unfollow(nickname):
 
 
 @user.route('/follows/<nickname>')
+@login_required
 def follows(nickname):
 
     user = User.query.filter_by(nickname=nickname).first()
