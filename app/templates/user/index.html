@@ -7,9 +7,9 @@
         <h4>
         Hello,
         {% if current_user.is_authenticated %}
-            {{current_user.nickname}}。{% if notice%}{{notice}}{%else%}欢迎浏览，开始你的创作，让世界认识你吧。{%endif%}
+            {{current_user.nickname}}。{% if notice%}{{notice}}{%else%}开始你的创作，让世界认识你吧。{%endif%}
         {% else %}
-            World
+            冒险者，为何独自徘徊，加入我们说说你的故事吧。
         {% endif %}
         </h4><br>
         {% if current_user.operation(Permission.WRITE_ARTICLES) %}

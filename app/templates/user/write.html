@@ -1,24 +1,33 @@
 {% extends "base.html" %}
 
+{%block styles%}
+{{super()}}
+<link rel="stylesheet" href="{{ url_for('static',filename='editormd/css/editormd.css') }}"/>
+{% endblock %}
 {% block content %}
 
 <h1>写文章</h1><hr>
 <form action="" method="post" name="write">
     {{form.hidden_tag()}}
-    <p>
+
         标题<br>
         {{form.title(class="form-control")}}<br>
         {% for error in form.title.errors %}
             <span style="color: red;">[{{error}}]</span>
         {% endfor %}<br>
+
         文章<br>
-        {{form.body(class="form-control",rows="30")}}<br>
-        {% for error in form.body.errors %}
-            <span style="color: red;">[{{error}}]</span>
-        {% endfor %}<br>
+
+        <div id="editormd">
+            {{form.body(style="display:none;")}}<br>
+            {% for error in form.body.errors %}
+                <span style="color: red;">[{{error}}]</span>
+            {% endfor %}<br>
+        </div>
+
         {{ form.submit(class="btn btn-default") }}<br><br>
         {{ form.save_draft(class="btn btn-default") }}
-    </p>
+
     <!--<p><input type="submit" class="btn btn-default" value="发布"></p>-->
     <!--<p><input type="submit" class="btn btn-default" value="保存草稿"></p>-->
 </form>
@@ -28,5 +37,17 @@
 {% endblock %}
 
 {% block scripts %}
-{{ pagedown.include_pagedown() }}
+{{super()}}
+<script src="{{ url_for('static',filename='editormd/editormd.min.js') }}"></script>
+    <script type="text/javascript">
+        var testEditor;
+        $(function () {
+            testEditor = editormd("editormd", {
+                width: "100%",
+                height: "550px",
+                syncScrolling: "single",
+                path: "{{ url_for('static',filename='editormd/lib/') }}"
+            });
+        });
+    </script>
 {% endblock %}

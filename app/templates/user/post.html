@@ -7,30 +7,30 @@
 {% for post in posts %}
 <h3 align="center">{{ post.title }}</h3>
 <p align="center">作者：<a href="{{ url_for('user.users', nickname=post.author.nickname) }}">{{ post.author.nickname }}</a> </p>
-<div class="post">
-    {% if post.body_html %}
-        {{ post.body_html | safe }}
-    {% else %}
-        {{post.body }}
-    {% endif %}
-</div>
-    <i class="right">{{ moment(post.timestamp).fromNow() }} 发布</i>
-    <br>
-    {% if current_user.is_authenticated %}
-    {% if post.like_num.filter_by(liker_id=current_user.id).first() == None %}
-        <a href="{{ url_for('user.like',id=post.id) }}" class="btn btn-info btn-lg">
-          <span class="glyphicon glyphicon-thumbs-up"></span> 点赞|{{ post.like_num.count() }}
-        </a>
-    {% else %}
-        <a href="{{ url_for('user.unlike',id=post.id) }}" class="btn btn-info btn-lg">
-          <span class="glyphicon glyphicon-thumbs-down"></span> 取消赞|{{ post.like_num.count() }}
-        </a>
-    {% endif %}
-    {% else %}
-        <a href="{{ url_for('user.like',id=post.id) }}" class="btn btn-info btn-lg">
-          <span class="glyphicon glyphicon-thumbs-up"></span> 点赞|{{ post.like_num.count() }}
-        </a>
-    {% endif %}
+
+{% if post.body_html %}
+    {{ post.body_html | safe }}
+{% else %}
+    {{post.body }}
+{% endif %}
+
+<i class="right">{{ moment(post.timestamp).fromNow() }} 发布</i>
+<br>
+{% if current_user.is_authenticated %}
+{% if post.like_num.filter_by(liker_id=current_user.id).first() == None %}
+    <a href="{{ url_for('user.like',id=post.id) }}" class="btn btn-info btn-lg">
+      <span class="glyphicon glyphicon-thumbs-up"></span> 点赞|{{ post.like_num.count() }}
+    </a>
+{% else %}
+    <a href="{{ url_for('user.unlike',id=post.id) }}" class="btn btn-info btn-lg">
+      <span class="glyphicon glyphicon-thumbs-down"></span> 取消赞|{{ post.like_num.count() }}
+    </a>
+{% endif %}
+{% else %}
+    <a href="{{ url_for('user.like',id=post.id) }}" class="btn btn-info btn-lg">
+      <span class="glyphicon glyphicon-thumbs-up"></span> 点赞|{{ post.like_num.count() }}
+    </a>
+{% endif %}
 {% endfor %}
 {% endif %}
 <hr>

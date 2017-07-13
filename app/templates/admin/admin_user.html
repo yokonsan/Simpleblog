@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>所有用户</h3><hr>
+{% if users %}
+{% for user in users %}
+    <ul class="list-group">
+        <li class="list-group-item">
+            <table>
+                <tr>
+                    <td>
+                        <a href="{{ url_for('user.users',nickname=user.nickname) }}">
+                            <img class="images" src="{{user.gravatar(size=150)}}">
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('user.users',nickname=user.nickname) }}">
+                            <h4>{{ user.nickname }}</h4>
+                        </a>
+                        {% if user.about_me %}<p>{{user.about_me}}</p>{% endif %}
+                        {% if user.last_seen %}<p><i>最后离开时间：{{moment(user.last_seen).format('LL')}}</i></p>{% endif %}
+                        <p>发布文章数：{{ user.posts.count() }}</p>
+                        <p>粉丝数：{{ user.followers.count() }}</p>
+                    </td>
+                </tr>
+            </table>
+            <div>
+                <span>
+
+                </span>
+                <span class="left">
+                    <br>
+
+                </span>
+
+            </div>
+            <div class="">
+
+            </div>
+        </li>
+    </ul>
+{% endfor %}
+{% endif %}
+{% endblock %}

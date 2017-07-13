@@ -1,11 +1,21 @@
 /*自己的样式*/
 body{
-    background-color: #BFD1D4;
+    background-color: #ECEEEF;
 }
 .right{
     margin: 0 5px 0 5px;
     float: right;
 }
+.left{
+    margin: 0 5px 0 5px;
+    float: left;
+}
+.art_outline{
+    margin-left: 50px;
+}
+.outline a:link {color:black;} /*未访问颜色*/
+.outline a:visited {color:gray;} /*已访问颜色*/
+.title a:visited {color: #9493c7;}
 .main{
     margin: 12px 0;
     padding: 40px;
@@ -16,7 +26,7 @@ body{
     text-indent: 35px;
 }
 .images{
-    margin-right: 20px;
+    margin-right: 10px;
 }
 .images2{
     margin-left: 20px;
@@ -49,6 +59,10 @@ body{
 .footer-content a {
     text-decoration: none;
 }
+.admin_user{
+    font-size: 20px;
+    margin-bottom: 12px;
+}
 
 /*floatButton*/
 .floatButton {
@@ -60,3 +74,4 @@ body{
 .letter{
     margin: 100px;
 }
+/*editor*/
