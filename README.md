@@ -56,7 +56,7 @@ $ heroku create <your appname>
 
 4.配置数据库
 ```
-$ heroku addons:add heroku-postgresql:hooby-dev
+$ heroku addons:add heroku-postgresql:hobby-dev
 ```
 
 5.设置自己的环境变量，例如设置管理员邮件地址
