@@ -85,4 +85,10 @@ $ heroku restart
 $ heroku maintenance:off
 ```
 
+### 阿里云部署
+
+觉得免费的Heroku太慢，并且有自己的服务器，想要部署线上。以阿里云部署为参考，利用Flask+WSGI+Nginx部署，亲测每页响应速度不到0.3s。
+
+具体部署参考大神文章：[文章地址](http://www.cnblogs.com/Ray-liang/p/4173923.html)
+
 ### Enjoy it.
